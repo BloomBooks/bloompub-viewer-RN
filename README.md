@@ -1,7 +1,18 @@
-# Getting Started
+# bloompub-viewer-RN
 
+> A cross-platform mobile viewer for bloomPUB books
+
+## Building
+
+```bash
+# install dependencies
 yarn
+
+# serve with hot reload
 yarn start
+```
+
+(It should hot reload if you edit existing files, but if you change the file structure, hot reloading might not work, restart the server if necessary)
 
 # Running the app on your phone
 
