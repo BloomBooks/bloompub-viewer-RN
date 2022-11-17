@@ -1,71 +1,77 @@
-import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View, Image } from 'react-native';
+import React from "react";
+import { StyleSheet, Text, View, Image, TouchableHighlight } from 'react-native';
 
-export const StartScreen: React.FunctionComponent<{}> = (props) => {
-  return (
-    <View style={styles.startScreen}>
-        <Image style={styles.logo} source={require('../assets/wordmark.png')} />
-      {/* <div
-        css={css`
-          margin-left: auto;
-          margin-right: auto;
-          margin-top: 60px;
-        `}
-      >
-        <img
-          src={wordmark}
-          css={css`
-            width: 455px;
-          `}
-        />
+export const StartScreen = () => {
+    const goRead = () => {}
 
-        <div
-          className={"choices"}
-          css={css`
-            margin-top: 20px;
-            a {
-              display: flex;
-              color: #d65649;
-              font-size: 24px;
-              //text-decoration: underline;
-              cursor: pointer;
-              img {
-                width: 30px;
-                margin-right: 15px;
-              }
-            }
-          `}
-        >
-          <a onClick={() => showOpenFile()}>
-            <img src={open} css={css``} />
-            Choose BloomPUB book on this computer
-          </a>
-          <br />
-          <a
-            onClick={() => {
-              window.electronApi.openLibrary();
-            }}
-          >
-            <img src={search} css={css``} />
-            Get BloomPUB books on BloomLibrary.org
-          </a>
-        </div>
-      </div> */}
-    </View>
-  );
+    return (
+        <View style={styles.startScreen}>
+            <Image
+                style={styles.logo}
+                source={require('../assets/wordmark.png')}
+            />
+            <TouchableHighlight
+                onPress={goRead}
+                style={styles.highlight}
+            >
+                <View style={styles.buttonContainer}>
+                    <Image
+                        style={styles.button}
+                        source={require('../assets/Open.png')}
+                    />
+                    <Text style={styles.text}>Choose BloomPUB book on this device</Text>
+                </View>
+            </TouchableHighlight>
+            <TouchableHighlight
+                onPress={goRead}
+                style={styles.highlight}
+            >
+                <View style={styles.buttonContainer}>
+                    <Image
+                        style={styles.button}
+                        source={require('../assets/Search.png')}
+                    />
+                    <Text style={styles.text}>Get BloomPUB books on BloomLibrary.org</Text>
+                </View>
+            </TouchableHighlight>
+        </View>
+    );
 };
+
+const bloomRed: string = "#d65649";
 
 const styles = StyleSheet.create({
     startScreen: {
-        display: "flex",
-        marginLeft: "auto",
-        marginRight: "auto",
+        flex: 1,
+        alignContent: "center",
+        justifyContent: "flex-start",
         marginTop: 60,
     },
     logo: {
         width: 255,
         height: 100,
         resizeMode: 'contain',
+    },
+    button: {
+        width: 30,
+        height: 30,
+        resizeMode: 'contain',
+    },
+    highlight: {
+        width: 275,
+        maxHeight: 40,
+        flexDirection: "row",
+        flex: 1,
+    },
+    buttonContainer: {
+        flex: 1,
+        flexDirection: "row",
+    },
+    text: {
+        marginLeft: 10,
+        marginTop: 5,
+        color: bloomRed,
     }
 });
-  
+
+export default StartScreen;

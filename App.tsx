@@ -1,7 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
-import { BookReader } from './src/BookReader';
-import Constants from 'expo-constants';
+import { StyleSheet, Text, View } from 'react-native';
 import { StartScreen } from './src/StartScreen';
 
 const App = () => {
@@ -10,23 +8,15 @@ const App = () => {
             <StartScreen />
             <StatusBar style="auto" />
         </View>
-        <SafeAreaView style={styles.safeAreaContainer}>
-            <BookReader />
-            <StatusBar />
-        </SafeAreaView>
     );
 }
 
-export default App;
-
 const styles = StyleSheet.create({
-    safeAreaContainer: {
-        height: "100%",
-        paddingTop: Constants.statusBarHeight
-    },
     container: {
         flex: 1,
         backgroundColor: '#fff',
         alignItems: 'center',
     },
 });
+
+export default App;
