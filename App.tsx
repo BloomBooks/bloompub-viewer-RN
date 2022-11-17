@@ -1,21 +1,20 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { BookReader } from './src/BookReader';
+import Constants from 'expo-constants';
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text style={{color: "blue"}}>Hello World!</Text>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+    return (
+        <SafeAreaView style={styles.safeAreaContainer}>
+            <BookReader />
+            <StatusBar />
+        </SafeAreaView>
+    );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+    safeAreaContainer: {
+        height: "100%",
+        paddingTop: Constants.statusBarHeight
+    },
 });

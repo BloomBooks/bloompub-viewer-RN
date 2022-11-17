@@ -1,0 +1,17 @@
+root = true
+
+# Defaults
+[*]
+trim_trailing_whitespace = true
+insert_final_newline = true
+//charset = utf-8 (due to VS2017 bug)
+indent_size = 4
+
+[*.{ts,json,js,md,jsx,css,less}]
+indent_style = space
+
+[*.sh]
+end_of_line = lf
+
+[ReleaseNotes.md]
+trim_trailing_whitespace=false
