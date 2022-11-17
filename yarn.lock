@@ -2222,6 +2222,11 @@ bl@^4.1.0:
     inherits "^2.0.4"
     readable-stream "^3.4.0"
 
+bloom-player@^2.1.19:
+  version "2.1.19"
+  resolved "https://registry.yarnpkg.com/bloom-player/-/bloom-player-2.1.19.tgz#3f348d058f6b5df880a16c2fb23105c06574686d"
+  integrity sha512-er6gJTX7VF6iqMPsTKdcf3INcse5K9O/ncKvwYQe5SymVLjGiuTAZ2ZdGFW3NAv/vRkjTJoyBnDhitnzrlBnzA==
+
 blueimp-md5@^2.10.0:
   version "2.19.0"
   resolved "https://registry.npmjs.org/blueimp-md5/-/blueimp-md5-2.19.0.tgz"
