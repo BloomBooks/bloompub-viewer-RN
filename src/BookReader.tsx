@@ -11,7 +11,8 @@ type BookReaderProps = {
     bookUrl: string
 }
 
-export const BookReader: FunctionComponent<BookReaderProps> = (props: BookReaderProps) => {
+export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
+    console.log('in BookReader');
     // react-native-webview has a bug on Android where local URI sources print out the HTML as text instead of a s HTML
     // For now, we'll just have Android reference the online version
     const baseUri = Platform.OS === "android"
@@ -30,7 +31,7 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props: BookReader
             return;
         }
 
-        const asyncHelper = async () => {
+       const asyncHelper = async () => {
             // Since I could't get the script referenced in the HTM file to run,
             // I just read it out and inject it via props instead to start its execution.
             //
@@ -71,7 +72,12 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props: BookReader
 
 const styles = StyleSheet.create({
     safeAreaContainer: {
-        height: "100%",
+        flex: 1,
+        backgroundColor: '#fff',
+        alignItems: 'center',
+        height: '100%',
         paddingTop: Constants.statusBarHeight
     },
 });
+
+export default BookReader;
