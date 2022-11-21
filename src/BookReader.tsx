@@ -2,14 +2,16 @@ import { Asset } from 'expo-asset'
 import * as FileSystem from "expo-file-system";
 import * as React from "react";
 import { FunctionComponent } from 'react';
-import { Platform, SafeAreaView, StyleSheet, } from 'react-native';
+import { Dimensions, Platform, StyleSheet } from 'react-native';
 import { WebView } from 'react-native-webview';
 
 import Constants from 'expo-constants';
 
-type BookReaderProps = {
+interface BookReaderProps  {
     bookUrl: string
 }
+
+const {height, width} = Dimensions.get('window');
 
 export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
     console.log('in BookReader');
@@ -19,6 +21,7 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
     const baseUri = Platform.OS === "android"
         ? "https://bloomlibrary.org/bloom-player/bloomplayer.htm?"
         : Asset.fromModule(require('../dist/bloom-player/bloomplayer.htm')).uri;
+
     const uri = `${baseUri}&url=${props.bookUrl}&centerVertically=true&independent=false&host=bloompubviewer`;
 
     // TODO: Are any of these params desired?
@@ -32,7 +35,7 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
             return;
         }
 
-       const asyncHelper = async () => {
+        const asyncHelper = async () => {
             // Since I could't get the script referenced in the HTM file to run,
             // I just read it out and inject it via props instead to start its execution.
             //
@@ -52,33 +55,31 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
     }, []);
 
     return (
-        <SafeAreaView style={styles.safeAreaContainer}>
-            <WebView
-                source={{
-                    uri: uri
-                }}
-                injectedJavaScript={bloomPlayerJS}
+        <WebView
+            style={styles.webViewStyles}
+            source={{
+                uri: uri
+            }}
+            injectedJavaScript={bloomPlayerJS}
 
-                scalesPageToFit={true}
-                automaticallyAdjustContentInsets={false}
+            scalesPageToFit={true}
+            automaticallyAdjustContentInsets={false}
 
-                javaScriptEnabled={true}
-                // domStorageEnabled={true}
-                // allowUniversalAccessFromFileURLs={true}
-                // allowFileAccess={true}
-            />
-        </SafeAreaView>
+            javaScriptEnabled={true}
+
+            // domStorageEnabled={true}
+            // allowUniversalAccessFromFileURLs={true}
+            // allowFileAccess={true}
+        />
     );
 }
 
 const styles = StyleSheet.create({
-    safeAreaContainer: {
+    webViewStyles: {
         flex: 1,
-        backgroundColor: '#fff',
-        alignItems: 'center',
-        height: '100%',
-        paddingTop: Constants.statusBarHeight
-    },
+        height: height,
+        width: width,
+    }
 });
 
 export default BookReader;
