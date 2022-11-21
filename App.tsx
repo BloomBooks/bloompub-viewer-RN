@@ -1,27 +1,26 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
-import { BookReader } from './src/BookReader';
-import { StartScreen } from './src/StartScreen';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import StartScreen from './src/screens/StartScreen';
+import { RootStackParamList } from './src/navigationTypes';
+import ReaderScreen from './src/screens/ReaderScreen';
+
+const RootStack = createNativeStackNavigator<RootStackParamList>();
 
 const App = () => {
-    const desiredScreen: 'start' | 'read' = 'start';
     return (
-        desiredScreen === 'start' ?
-            <View style={styles.container}>
-                <StartScreen />
-                <StatusBar style="auto" />
-            </View>
-            :
-            <BookReader bookUrl='https%3A%2F%2Fs3.amazonaws.com%2Fbloomharvest-sandbox%2Fcolin_suggett%2540sil.org%252f885ba15f-97a7-4c83-ba3c-ae263607d9e6%2Fbloomdigital%252findex.htm' />
+        <NavigationContainer>
+            <RootStack.Navigator initialRouteName='Home' id='PUBViewer'>
+                <RootStack.Screen
+                    name='Home'
+                    component={StartScreen}
+                />
+                <RootStack.Screen
+                    name='Read'
+                    component={ReaderScreen}
+                />
+            </RootStack.Navigator>
+        </NavigationContainer>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-        alignItems: 'center',
-    },
-});
 
 export default App;
