@@ -8,7 +8,7 @@ config.resolver.assetExts.push(
     // ENHANCE: We'd like to be able to bundle bloomplayer.min.js, but
     // adding the "js" or "javascript" extension breaks the build
     // (not too surprising in my opinion, since most Javascript files shouldn't be treated as assets)
-    // For name, work around this by renaming the bloomplayer.min.js file to have .asdf extension.
+    // For now, work around this by renaming the bloomplayer.min.js file to have .jsAsset extension.
     // Ideally, we could figure out a better workaround...
     'jsAsset'
 );

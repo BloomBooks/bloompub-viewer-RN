@@ -13,7 +13,8 @@ type BookReaderProps = {
 
 export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
     console.log('in BookReader');
-    // react-native-webview has a bug on Android where local URI sources print out the HTML as text instead of a s HTML
+    // react-native-webview has a bug on Android where local URI sources print out the HTML as text instead of as HTML
+    // (See https://github.com/react-native-webview/react-native-webview/issues/428 and https://github.com/react-native-webview/react-native-webview/issues/518)
     // For now, we'll just have Android reference the online version
     const baseUri = Platform.OS === "android"
         ? "https://bloomlibrary.org/bloom-player/bloomplayer.htm?"
