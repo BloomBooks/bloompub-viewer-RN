@@ -2,19 +2,16 @@ import { Asset } from 'expo-asset'
 import * as FileSystem from "expo-file-system";
 import * as React from "react";
 import { FunctionComponent } from 'react';
-import { Dimensions, Platform, StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import { WebView } from 'react-native-webview';
 
-import Constants from 'expo-constants';
 
 interface BookReaderProps  {
-    bookUrl: string
+    bookUrl: string,
 }
 
-const {height, width} = Dimensions.get('window');
-
 export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
-    console.log('in BookReader');
+    //console.log('in BookReader');
     // react-native-webview has a bug on Android where local URI sources print out the HTML as text instead of as HTML
     // (See https://github.com/react-native-webview/react-native-webview/issues/428 and https://github.com/react-native-webview/react-native-webview/issues/518)
     // For now, we'll just have Android reference the online version
@@ -77,8 +74,6 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
 const styles = StyleSheet.create({
     webViewStyles: {
         flex: 1,
-        height: height,
-        width: width,
     }
 });
 
