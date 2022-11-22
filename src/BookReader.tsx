@@ -1,13 +1,12 @@
-import { Asset } from 'expo-asset'
+import { Asset } from "expo-asset";
 import * as FileSystem from "expo-file-system";
 import * as React from "react";
-import { FunctionComponent } from 'react';
-import { Platform, StyleSheet } from 'react-native';
-import { WebView } from 'react-native-webview';
+import { FunctionComponent } from "react";
+import { Platform, StyleSheet } from "react-native";
+import { WebView } from "react-native-webview";
 
-
-interface BookReaderProps  {
-    bookUrl: string,
+interface BookReaderProps {
+    bookUrl: string;
 }
 
 export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
@@ -15,9 +14,13 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
     // react-native-webview has a bug on Android where local URI sources print out the HTML as text instead of as HTML
     // (See https://github.com/react-native-webview/react-native-webview/issues/428 and https://github.com/react-native-webview/react-native-webview/issues/518)
     // For now, we'll just have Android reference the online version
-    const baseUri = Platform.OS === "android"
-        ? "https://bloomlibrary.org/bloom-player/bloomplayer.htm?"
-        : Asset.fromModule(require('../dist/bloom-player/bloomplayer.htm')).uri;
+    const baseUri =
+        Platform.OS === "android"
+            ? "https://bloomlibrary.org/bloom-player/bloomplayer.htm?"
+            : Asset.fromModule(
+                  // eslint-disable-next-line @typescript-eslint/no-var-requires
+                  require("../dist/bloom-player/bloomplayer.htm")
+              ).uri;
 
     const uri = `${baseUri}&url=${props.bookUrl}&centerVertically=true&independent=false&host=bloompubviewer`;
 
@@ -39,14 +42,22 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
             // ENHANCE: The old script tag is still in the HTML and will print out an error message
             // in the console. A minor annoyance.
 
-            const bloomPlayerJSAsset = Asset.fromModule(require('../dist/bloom-player/bloomPlayer.jsAsset'));
+            const bloomPlayerJSAsset = Asset.fromModule(
+                // eslint-disable-next-line @typescript-eslint/no-var-requires
+                require("../dist/bloom-player/bloomPlayer.jsAsset")
+            );
             await bloomPlayerJSAsset.downloadAsync();
 
             if (!bloomPlayerJSAsset.localUri) {
                 return;
             }
-            const jsFileContents = await FileSystem.readAsStringAsync(bloomPlayerJSAsset.localUri);
-            setBloomPlayerJS(jsFileContents + "\ntrue; // note: this is required, or you'll sometimes get silent failures");
+            const jsFileContents = await FileSystem.readAsStringAsync(
+                bloomPlayerJSAsset.localUri
+            );
+            setBloomPlayerJS(
+                jsFileContents +
+                    "\ntrue; // note: this is required, or you'll sometimes get silent failures"
+            );
         };
         asyncHelper();
     }, []);
@@ -55,13 +66,11 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
         <WebView
             style={styles.webViewStyles}
             source={{
-                uri: uri
+                uri: uri,
             }}
             injectedJavaScript={bloomPlayerJS}
-
             scalesPageToFit={true}
             automaticallyAdjustContentInsets={false}
-
             javaScriptEnabled={true}
 
             // domStorageEnabled={true}
@@ -69,12 +78,12 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
             // allowFileAccess={true}
         />
     );
-}
+};
 
 const styles = StyleSheet.create({
     webViewStyles: {
         flex: 1,
-    }
+    },
 });
 
 export default BookReader;
