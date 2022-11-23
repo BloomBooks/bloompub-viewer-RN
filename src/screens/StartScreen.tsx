@@ -13,13 +13,16 @@ import { HomeScreenProps } from "../navigationTypes";
 const defaultUrl =
     "https%3A%2F%2Fs3.amazonaws.com%2Fbloomharvest-sandbox%2Fcolin_suggett%2540sil.org%252f885ba15f-97a7-4c83-ba3c-ae263607d9e6%2Fbloomdigital%252findex.htm";
 
+const validFileTypes = [".bloompub", ".bloomd"]; // Bloom Library currently has both
+
 export const StartScreen: FunctionComponent<HomeScreenProps> = ({
     navigation,
 }: HomeScreenProps) => {
     console.log("in Home screen");
     const [uri, setUri] = useState(defaultUrl);
-    const goRead = () => {
-        readInternal(uri);
+    const goToBloomLibrary = () => {
+        navigation.navigate("Library");
+        console.log("switching to Bloom Library screen");
     };
     const readInternal = (internalUri: string) => {
         //navigation.navigate("Read", { bookUrl: internalUri });
@@ -28,14 +31,24 @@ export const StartScreen: FunctionComponent<HomeScreenProps> = ({
     };
     const pickFile = async () => {
         const options = {
-            // This is what .bloompubs report as. Unfortunately, this doesn't seem to do anything.
+            // This is what .bloompubs report as, since they are essentially .zip files.
+            // Unfortunately, this doesn't seem to do anything.
             type: "application/octet-stream",
             copyToCacheDirectory: true,
         };
         try {
             const pickerResult = await DocumentPicker.getDocumentAsync(options);
             if (pickerResult.type === "success") {
-                if (!pickerResult.name.toLowerCase().endsWith("bloompub")) {
+                const lcFilename = pickerResult.name.toLowerCase();
+                const lastDotIndex = lcFilename.lastIndexOf(".");
+                if (lastDotIndex < 1) {
+                    // shouldn't happen!
+                    setUri(defaultUrl);
+                    return;
+                }
+                const extension = lcFilename.substring(lastDotIndex);
+                console.log("file extension: " + extension);
+                if (!validFileTypes.includes(extension)) {
                     alert("Please choose a .bloompub file");
                     setUri(defaultUrl);
                     return;
@@ -73,7 +86,10 @@ export const StartScreen: FunctionComponent<HomeScreenProps> = ({
                     </Text>
                 </View>
             </TouchableHighlight>
-            <TouchableHighlight onPress={goRead} style={styles.highlight}>
+            <TouchableHighlight
+                onPress={goToBloomLibrary}
+                style={styles.highlight}
+            >
                 <View style={styles.buttonContainer}>
                     <Image
                         style={styles.button}
