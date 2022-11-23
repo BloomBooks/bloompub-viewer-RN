@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { RootStackParamList } from "./src/navigationTypes";
 import StartScreen from "./src/screens/StartScreen";
 import ReaderScreen from "./src/screens/ReaderScreen";
+import LibraryScreen from "./src/screens/FindOnBloomLibrary";
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 
@@ -13,6 +14,7 @@ const App = () => {
             <RootStack.Navigator initialRouteName="Home" id="PUBViewer">
                 <RootStack.Screen name="Home" component={StartScreen} />
                 <RootStack.Screen name="Read" component={ReaderScreen} />
+                <RootStack.Screen name="Library" component={LibraryScreen} />
             </RootStack.Navigator>
         </NavigationContainer>
     );
