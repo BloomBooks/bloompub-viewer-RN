@@ -23,6 +23,7 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
               ).uri;
 
     const uri = `${baseUri}&url=${props.bookUrl}&centerVertically=true&independent=false&host=bloompubviewer`;
+    console.log("Read uri: " + uri);
 
     // TODO: Are any of these params desired?
     // &useOriginalPageSize=true&allowToggleAppBar=true&lang=en&hideFullScreenButton=false
