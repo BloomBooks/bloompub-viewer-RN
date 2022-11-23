@@ -49,7 +49,7 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
 
             const bloomPlayerJSAsset = Asset.fromModule(
                 // eslint-disable-next-line @typescript-eslint/no-var-requires
-                require("../dist/bloom-player/bloomPlayer.jsAsset")
+                require("../dist/bloom-player/bloomPlayerMin.jsAsset")
             );
             await bloomPlayerJSAsset.downloadAsync();
 

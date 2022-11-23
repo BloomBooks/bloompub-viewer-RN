@@ -1,5 +1,5 @@
 import * as FileSystem from "expo-file-system";
-// import { unzip } from "react-native-zip-archive";
+import { unzip } from "react-native-zip-archive";
 
 const OPEN_BOOK_DIR = FileSystem.cacheDirectory + "/openBook";
 
@@ -9,9 +9,9 @@ export async function openBookForReading(
     console.log("OpenBookDir: " + OPEN_BOOK_DIR);
     await safeUnlink(OPEN_BOOK_DIR);
 
-    // TODO: Problem! Expo doesn't work with react-native-zip-archive out of the box
-    return OPEN_BOOK_DIR;
-    // return await unzip(bookFilePath, OPEN_BOOK_DIR);
+    // // TODO: Problem! Expo doesn't work with react-native-zip-archive out of the box
+    // return OPEN_BOOK_DIR;
+    return await unzip(bookFilePath, OPEN_BOOK_DIR);
 }
 
 /**
