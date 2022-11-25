@@ -13,6 +13,7 @@ interface BookReaderProps {
 export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
     const [bloomPlayerJS, setBloomPlayerJS] = useState("");
     const [bookHtmPath, setBookHtmPath] = useState("");
+    const [uri, setUri] = useState("");
 
     const [error, setError] = useState<string | null>(null);
 
@@ -28,58 +29,46 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
                   require("../dist/bloom-player/bloomplayer.htm")
               ).uri;
 
-    const uri = `${baseUri}&url=${bookHtmPath}&centerVertically=true&independent=false&host=bloompubviewer`;
-    console.log("Read uri: " + uri);
-
-    // TODO: Are any of these params desired?
-    // &useOriginalPageSize=true&allowToggleAppBar=true&lang=en&hideFullScreenButton=false
-
     useEffect(() => {
-        const loadBloomPlayerAssetAsync = async () => {
-            if (Platform.OS === "android") {
-                // Since Android isn't attempting local in this way, no need for this.
-                return;
-            }
-
-            // Since I could't get the script referenced in the HTM file to run,
-            // I just read it out and inject it via props instead to start its execution.
-            //
-            // ENHANCE: The old script tag is still in the HTML and will print out an error message
-            // in the console. A minor annoyance.
-
-            const bloomPlayerJSAsset = Asset.fromModule(
-                // eslint-disable-next-line @typescript-eslint/no-var-requires
-                require("../dist/bloom-player/bloomPlayerMin.jsAsset")
-            );
-            await bloomPlayerJSAsset.downloadAsync();
-
-            if (!bloomPlayerJSAsset.localUri) {
-                return;
-            }
-            const jsFileContents = await FileSystem.readAsStringAsync(
-                bloomPlayerJSAsset.localUri
-            );
-            setBloomPlayerJS(
-                jsFileContents +
-                    "\ntrue; // note: this is required, or you'll sometimes get silent failures"
-            );
-        };
-        loadBloomPlayerAssetAsync();
-
         // Unzip .bloompub and get the path to the HTM file inside the .bloompub
         const openBookFromStorageAsync = async () => {
-            const unzippedBookFolderPath = await openBookForReading(
+            let unzippedBookFolderPath = await openBookForReading(
                 props.bloomPubPath
             );
+            if (unzippedBookFolderPath === "failed") {
+                setError("Failed to unzip book");
+                return;
+            }
+            console.log("unzippedbook at: " + unzippedBookFolderPath);
+            if (Platform.OS === "android") {
+                // TODO: check to see if this is necessary on ios or not, might not be...
+                unzippedBookFolderPath = "file://" + unzippedBookFolderPath;
+            }
+
+            // let directoryContents: string[] = [];
+            // try {
+            //     const dirInfo = await FileSystem.getInfoAsync(
+            //         unzippedBookFolderPath
+            //     );
+            //     if (dirInfo.isDirectory) {
+            //         console.log("Is a directory! size is:" + dirInfo.size);
+            //     }
             const directoryContents = await FileSystem.readDirectoryAsync(
                 unzippedBookFolderPath
             );
+            // } catch (error) {
+            //     console.error(`readDirectoryAsync error: ${error}`);
+            // }
+            // console.log(
+            //     "directoryContents: " + JSON.stringify(directoryContents)
+            // );
             const htmFiles = directoryContents.filter((filename) =>
                 filename.endsWith(".htm")
             );
-            if (htmFiles.length >= 0) {
-                console.log("bookHtmPath: " + bookHtmPath);
-                setBookHtmPath(htmFiles[0]);
+            if (htmFiles.length > 0) {
+                const htmPath = htmFiles[0];
+                console.log("bookHtmPath: " + htmPath);
+                setBookHtmPath(htmPath);
             } else {
                 setError("Couldn't find any HTM files in book");
             }
@@ -87,25 +76,74 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
         openBookFromStorageAsync();
     }, []);
 
+    useEffect(
+        () => {
+            if (bookHtmPath === "") return; // not ready yet
+            const uri = `${baseUri}&url=${bookHtmPath}&centerVertically=true&independent=false&host=bloompubviewer`;
+            console.log("Read uri: " + uri);
+            setUri(uri);
+            const loadBloomPlayerAssetAsync = async () => {
+                if (Platform.OS === "android") {
+                    // Since Android isn't attempting local in this way, no need for this.
+                    return;
+                }
+
+                // Since I could't get the script referenced in the HTM file to run,
+                // I just read it out and inject it via props instead to start its execution.
+                //
+                // ENHANCE: The old script tag is still in the HTML and will print out an error message
+                // in the console. A minor annoyance.
+
+                const bloomPlayerJSAsset = Asset.fromModule(
+                    // eslint-disable-next-line @typescript-eslint/no-var-requires
+                    require("../dist/bloom-player/bloomPlayerMin.jsAsset")
+                );
+                await bloomPlayerJSAsset.downloadAsync();
+
+                if (!bloomPlayerJSAsset.localUri) {
+                    return;
+                }
+                const jsFileContents = await FileSystem.readAsStringAsync(
+                    bloomPlayerJSAsset.localUri
+                );
+                setBloomPlayerJS(
+                    jsFileContents +
+                        "\ntrue; // note: this is required, or you'll sometimes get silent failures"
+                );
+            };
+            loadBloomPlayerAssetAsync();
+        },
+        // don't bother setting the uri or loading the jsAsset unless we've unzipped something.
+        [bookHtmPath]
+    );
+
+    // TODO: Are any of these params desired?
+    // &useOriginalPageSize=true&allowToggleAppBar=true&lang=en&hideFullScreenButton=false
+
     return (
         <>
             {error ? (
                 <Text>Error: {error}</Text>
             ) : (
-                <WebView
-                    style={styles.webViewStyles}
-                    source={{
-                        uri: uri,
-                    }}
-                    injectedJavaScript={bloomPlayerJS}
-                    scalesPageToFit={true}
-                    automaticallyAdjustContentInsets={false}
-                    javaScriptEnabled={true}
-
-                    // domStorageEnabled={true}
-                    // allowUniversalAccessFromFileURLs={true}
-                    // allowFileAccess={true}
-                />
+                <>
+                    {uri === "" ? (
+                        <Text>Loading...</Text>
+                    ) : (
+                        <WebView
+                            style={styles.webViewStyles}
+                            source={{
+                                uri: uri,
+                            }}
+                            injectedJavaScript={bloomPlayerJS}
+                            scalesPageToFit={true}
+                            automaticallyAdjustContentInsets={false}
+                            javaScriptEnabled={true}
+                            // domStorageEnabled={true}
+                            // allowUniversalAccessFromFileURLs={true}
+                            // allowFileAccess={true}
+                        />
+                    )}
+                </>
             )}
         </>
     );
