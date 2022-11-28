@@ -42,6 +42,16 @@ yarn start
 -   Error in network response: Ensure network settings correct (see one-time setup)
 -   "Cannot connect to Metro": It times out really quickly. Reload the app on your phone.
 
+## Debugging bloom-player
+
+-   Go to a bloom-player repo at the desired revision.
+-   yarn build-dev. (This builds an unminified version)
+-   Copy the contents of bloom-player's dist/bloomPlayer.js to this repo's dist/bloomPlayerMin.jsAsset
+-   Reload the app
+-   Edit this file (dist/bloomPlayerMin.jsAsset) as needed for debugging purposes.
+-   Reload the app every time this file changes.
+-   Note: If you re-run yarn in this repo, you will need to rerun these steps.
+
 ## Creating new custom build
 
 -   It's only necessary to do an EAS build if new custom native modules are needed.
