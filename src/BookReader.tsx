@@ -4,13 +4,20 @@ import * as React from "react";
 import { FunctionComponent, useEffect, useState } from "react";
 import { Platform, StyleSheet, Text } from "react-native";
 import { WebView } from "react-native-webview";
-import { openBookForReading } from "./storage/BookStorage";
+import { openBookForReading, OPEN_BOOK_DIR } from "./storage/BookStorage";
+import { readAssetContentsAsync } from "./storage/utils";
 
 interface BookReaderProps {
     bloomPubPath: string;
 }
 
+const ANDROID_BLOOM_PLAYER_FOLDER = FileSystem.cacheDirectory + "bloomPlayer";
+const ANDROID_BLOOM_PLAYER_PATH = `${ANDROID_BLOOM_PLAYER_FOLDER}/bloomplayer.htm`;
+
 export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
+    const [bloomPlayerHtmReady, setBloomPlayerHtmReady] = useState(
+        Platform.OS !== "android"
+    );
     const [bloomPlayerJS, setBloomPlayerJS] = useState("");
     const [bookHtmPath, setBookHtmPath] = useState("");
     const [uri, setUri] = useState("");
@@ -20,10 +27,11 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
     //console.log('in BookReader');
     // react-native-webview has a bug on Android where local URI sources print out the HTML as text instead of as HTML
     // (See https://github.com/react-native-webview/react-native-webview/issues/428 and https://github.com/react-native-webview/react-native-webview/issues/518)
-    // For now, we'll just have Android reference the online version
+    // To work around it, we copy the HTM from dist into an HTM in the cache folder,
+    // then point to the HTM path in the cache folder.
     const baseUri =
         Platform.OS === "android"
-            ? "https://bloomlibrary.org/bloom-player/bloomplayer.htm?"
+            ? ANDROID_BLOOM_PLAYER_PATH + "?"
             : Asset.fromModule(
                   // eslint-disable-next-line @typescript-eslint/no-var-requires
                   require("../dist/bloom-player/bloomplayer.htm")
@@ -79,15 +87,13 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
     useEffect(
         () => {
             if (bookHtmPath === "") return; // not ready yet
-            const uri = `${baseUri}&url=${bookHtmPath}&centerVertically=true&independent=false&host=bloompubviewer`;
+            //const dirLessFile = OPEN_BOOK_DIR.substring(7); // experimented with 7 and 8 here
+            //const encodedPath = encodeURI(`${dirLessFile}/${bookHtmPath}`);
+            const encodedPath = encodeURI(`${OPEN_BOOK_DIR}/${bookHtmPath}`);
+            const uri = `${baseUri}&url=${encodedPath}&centerVertically=true&independent=false&host=bloompubviewer`;
             console.log("Read uri: " + uri);
             setUri(uri);
             const loadBloomPlayerAssetAsync = async () => {
-                if (Platform.OS === "android") {
-                    // Since Android isn't attempting local in this way, no need for this.
-                    return;
-                }
-
                 // Since I could't get the script referenced in the HTM file to run,
                 // I just read it out and inject it via props instead to start its execution.
                 //
@@ -98,13 +104,8 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
                     // eslint-disable-next-line @typescript-eslint/no-var-requires
                     require("../dist/bloom-player/bloomPlayerMin.jsAsset")
                 );
-                await bloomPlayerJSAsset.downloadAsync();
-
-                if (!bloomPlayerJSAsset.localUri) {
-                    return;
-                }
-                const jsFileContents = await FileSystem.readAsStringAsync(
-                    bloomPlayerJSAsset.localUri
+                const jsFileContents = await readAssetContentsAsync(
+                    bloomPlayerJSAsset
                 );
                 setBloomPlayerJS(
                     jsFileContents +
@@ -112,6 +113,35 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
                 );
             };
             loadBloomPlayerAssetAsync();
+
+            if (Platform.OS === "android") {
+                // Copy HTM from dist to cache
+                // (Special workaround for react-native-webview bug preventing loading the dist version directly)
+                const loadBloomPlayerHtmAsync = async () => {
+                    const bloomPlayerHtmAsset = Asset.fromModule(
+                        // eslint-disable-next-line @typescript-eslint/no-var-requires
+                        require("../dist/bloom-player/bloomplayer.htm")
+                    );
+                    const bloomPlayerHtmContents = await readAssetContentsAsync(
+                        bloomPlayerHtmAsset
+                    );
+
+                    if (!bloomPlayerHtmContents) {
+                        return;
+                    }
+
+                    FileSystem.makeDirectoryAsync(ANDROID_BLOOM_PLAYER_FOLDER, {
+                        intermediates: true,
+                    });
+                    await FileSystem.writeAsStringAsync(
+                        ANDROID_BLOOM_PLAYER_PATH,
+                        bloomPlayerHtmContents
+                    );
+                    setBloomPlayerHtmReady(true);
+                };
+
+                loadBloomPlayerHtmAsync();
+            }
         },
         // don't bother setting the uri or loading the jsAsset unless we've unzipped something.
         [bookHtmPath]
@@ -120,27 +150,33 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
     // TODO: Are any of these params desired?
     // &useOriginalPageSize=true&allowToggleAppBar=true&lang=en&hideFullScreenButton=false
 
+    const isLoading = uri === "" || !bloomPlayerHtmReady || !bloomPlayerJS;
+
+    if (!isLoading && bloomPlayerJS.length <= 0) {
+        // I think Webview only injects the Javascript on the first time,
+        // so we do want the Javascript to be ready before we make the Webview for the first time.
+        console.warn("Starting Webview, but javascript code is not ready yet!");
+    }
+
     return (
         <>
             {error ? (
                 <Text>Error: {error}</Text>
             ) : (
                 <>
-                    {uri === "" ? (
+                    {isLoading ? (
                         <Text>Loading...</Text>
                     ) : (
                         <WebView
                             style={styles.webViewStyles}
-                            source={{
-                                uri: uri,
-                            }}
+                            source={{ uri }}
                             injectedJavaScript={bloomPlayerJS}
                             scalesPageToFit={true}
                             automaticallyAdjustContentInsets={false}
                             javaScriptEnabled={true}
                             // domStorageEnabled={true}
                             // allowUniversalAccessFromFileURLs={true}
-                            // allowFileAccess={true}
+                            allowFileAccess={true}
                         />
                     )}
                 </>
