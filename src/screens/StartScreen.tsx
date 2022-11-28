@@ -25,8 +25,8 @@ export const StartScreen: FunctionComponent<HomeScreenProps> = ({
         console.log("switching to Bloom Library screen");
     };
     const readInternal = (internalUri: string) => {
-        //navigation.navigate("Read", { bookUrl: internalUri });
-        navigation.navigate("Read", { bookUrl: defaultUrl });
+        navigation.navigate("Read", { bookUrl: internalUri });
+        // navigation.navigate("Read", { bookUrl: defaultUrl });
         console.log("switching to Read screen");
     };
     const pickFile = async () => {

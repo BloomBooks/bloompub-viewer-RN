@@ -17,16 +17,23 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "org.bloomlibrary.bloompubviewer"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "package": "org.bloomlibrary.bloompubviewer"
     },
     "web": {
       "favicon": "./assets/icon-32.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "95346fb8-2dd8-4513-9318-1c72e5c5c099"
+      }
     }
   }
 }

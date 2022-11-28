@@ -22,7 +22,7 @@ export const ReaderScreen: FunctionComponent<ReaderScreenProps> = ({
 
     return (
         <SafeAreaView style={styles.container}>
-            <BookReader bookUrl={route.params.bookUrl} />
+            <BookReader bloomPubPath={route.params.bookUrl} />
         </SafeAreaView>
     );
 };
