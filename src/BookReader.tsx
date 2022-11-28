@@ -5,7 +5,7 @@ import { FunctionComponent, useEffect, useState } from "react";
 import { Platform, StyleSheet, Text } from "react-native";
 import { WebView } from "react-native-webview";
 import { openBookForReading, OPEN_BOOK_DIR } from "./storage/BookStorage";
-import { readAssetContentsAsync } from "./storage/utils";
+import { readAssetContentsAsync } from "./storage/Utils";
 
 interface BookReaderProps {
     bloomPubPath: string;
@@ -174,9 +174,12 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
                             scalesPageToFit={true}
                             automaticallyAdjustContentInsets={false}
                             javaScriptEnabled={true}
+                            allowFileAccess={true} // Needed for Android to access the bloomplayer.htm in cache dir
+                            allowFileAccessFromFileURLs={true} // Needed to load the HTM of the book. allowUniversalAccessFromFileURLs is fine too.
                             // domStorageEnabled={true}
+                            // mixedContentMode="always"
                             // allowUniversalAccessFromFileURLs={true}
-                            allowFileAccess={true}
+                            // originWhitelist={["*"]}
                         />
                     )}
                 </>
