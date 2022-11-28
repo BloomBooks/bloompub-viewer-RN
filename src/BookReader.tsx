@@ -174,9 +174,12 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
                             scalesPageToFit={true}
                             automaticallyAdjustContentInsets={false}
                             javaScriptEnabled={true}
+                            allowFileAccess={true} // Needed for Android to access the bloomplayer.htm in cache dir
+                            allowFileAccessFromFileURLs={true} // Needed to load the HTM of the book. allowUniversalAccessFromFileURLs is fine too.
                             // domStorageEnabled={true}
+                            // mixedContentMode="always"
                             // allowUniversalAccessFromFileURLs={true}
-                            allowFileAccess={true}
+                            // originWhitelist={["*"]}
                         />
                     )}
                 </>
