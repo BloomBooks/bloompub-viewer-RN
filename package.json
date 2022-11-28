@@ -6,11 +6,12 @@
     "license": "MIT",
     "main": "node_modules/expo/AppEntry.js",
     "scripts": {
-        "start": "expo start",
-        "android": "expo start --android",
-        "ios": "expo start --ios",
-        "web": "expo start --web",
-        "dev": "expo start --dev-client",
+        "start": "expo start --dev-client",
+        "startNoCustomNativeComments": "Running \"yarn startNoCustomNative\" will allow you to open it via the default Expo Go app, but any functionality that relies on custom native modules will fail.",
+        "startNoCustomNative": "expo start",
+        "android": "expo start --dev-client --android",
+        "ios": "expo start --dev-client --ios",
+        "web": "expo start --dev-client --web",
         "lint": "eslint \"./**/!(*.d).ts{,x}\"",
         "postinstallComments": "// Runs automatically after running 'yarn' or 'yarn install'",
         "postinstall": "node ./scripts/copyWebModules.js"
