@@ -5,7 +5,7 @@ import { FunctionComponent, useEffect, useState } from "react";
 import { Platform, StyleSheet, Text } from "react-native";
 import { WebView } from "react-native-webview";
 import { openBookForReading, OPEN_BOOK_DIR } from "./storage/BookStorage";
-import { readAssetContentsAsync } from "./storage/utils";
+import { readAssetContentsAsync } from "./storage/Utils";
 
 interface BookReaderProps {
     bloomPubPath: string;
