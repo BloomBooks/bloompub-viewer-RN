@@ -5,6 +5,7 @@ import { ReaderScreenProps } from "../navigationTypes";
 import BookReader from "../components/BookReader/BookReader";
 
 export const ReaderScreen: FunctionComponent<ReaderScreenProps> = ({
+    navigation,
     route,
 }: ReaderScreenProps) => {
     // Besides height and width, the object also contains scale and fontsize,
@@ -22,7 +23,10 @@ export const ReaderScreen: FunctionComponent<ReaderScreenProps> = ({
 
     return (
         <SafeAreaView style={styles.container}>
-            <BookReader bloomPubPath={route.params.bookUrl} />
+            <BookReader
+                bloomPubPath={route.params.bookUrl}
+                navigation={navigation}
+            />
         </SafeAreaView>
     );
 };
