@@ -2,7 +2,7 @@ import * as React from "react";
 import { FunctionComponent } from "react";
 import { SafeAreaView, StyleSheet, useWindowDimensions } from "react-native";
 import { ReaderScreenProps } from "../navigationTypes";
-import BookReader from "../BookReader";
+import BookReader from "../components/BookReader/BookReader";
 
 export const ReaderScreen: FunctionComponent<ReaderScreenProps> = ({
     route,
