@@ -4,8 +4,8 @@ import * as React from "react";
 import { FunctionComponent, useEffect, useState } from "react";
 import { Platform, StyleSheet, Text } from "react-native";
 import { WebView } from "react-native-webview";
-import { openBookForReading, OPEN_BOOK_DIR } from "./storage/BookStorage";
-import { copyAssetAsync, readAssetContentsAsync } from "./storage/Utils";
+import { openBookForReading, OPEN_BOOK_DIR } from "../../storage/BookStorage";
+import { copyAssetAsync, readAssetContentsAsync } from "../../util/FileUtil";
 
 interface BookReaderProps {
     bloomPubPath: string;
@@ -34,7 +34,7 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
             ? ANDROID_BLOOM_PLAYER_PATH + "?"
             : Asset.fromModule(
                   // eslint-disable-next-line @typescript-eslint/no-var-requires
-                  require("../dist/bloom-player/bloomplayer.htm")
+                  require("../../../dist/bloom-player/bloomplayer.htm")
               ).uri;
 
     useEffect(() => {
@@ -102,7 +102,7 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
 
                 const bloomPlayerJSAsset = Asset.fromModule(
                     // eslint-disable-next-line @typescript-eslint/no-var-requires
-                    require("../dist/bloom-player/bloomPlayerMin.jsAsset")
+                    require("../../../dist/bloom-player/bloomPlayerMin.jsAsset")
                 );
                 const jsFileContents = await readAssetContentsAsync(
                     bloomPlayerJSAsset
@@ -120,7 +120,7 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
                 const loadBloomPlayerHtmAsync = async () => {
                     const bloomPlayerHtmAsset = Asset.fromModule(
                         // eslint-disable-next-line @typescript-eslint/no-var-requires
-                        require("../dist/bloom-player/bloomplayer.htm")
+                        require("../../../dist/bloom-player/bloomplayer.htm")
                     );
 
                     await ensureBPFolderAsync();
@@ -138,11 +138,11 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
                 const audioAssets = [
                     Asset.fromModule(
                         // eslint-disable-next-line @typescript-eslint/no-var-requires
-                        require("../dist/bloom-player/right_answer-913c37e88e2939122d763361833efd24.mp3")
+                        require("../../../dist/bloom-player/right_answer-913c37e88e2939122d763361833efd24.mp3")
                     ),
                     Asset.fromModule(
                         // eslint-disable-next-line @typescript-eslint/no-var-requires
-                        require("../dist/bloom-player/wrong_answer-f96cfc1e0cc2cea2dd523d521d4c8738.mp3")
+                        require("../../../dist/bloom-player/wrong_answer-f96cfc1e0cc2cea2dd523d521d4c8738.mp3")
                     ),
                 ];
                 audioAssets.forEach(async (asset) => {
