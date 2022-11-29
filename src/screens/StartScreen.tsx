@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
 import { HomeScreenProps } from "../navigationTypes";
+import { Colors } from "../constants/Colors";
 
 const defaultUrl =
     "https%3A%2F%2Fs3.amazonaws.com%2Fbloomharvest-sandbox%2Fcolin_suggett%2540sil.org%252f885ba15f-97a7-4c83-ba3c-ae263607d9e6%2Fbloomdigital%252findex.htm";
@@ -104,8 +105,6 @@ export const StartScreen: FunctionComponent<HomeScreenProps> = ({
     );
 };
 
-const bloomRed: string = "#d65649";
-
 const styles = StyleSheet.create({
     startScreen: {
         flex: 1,
@@ -136,7 +135,7 @@ const styles = StyleSheet.create({
     text: {
         marginLeft: 10,
         marginTop: 5,
-        color: bloomRed,
+        color: Colors.bloomRed,
     },
 });
 

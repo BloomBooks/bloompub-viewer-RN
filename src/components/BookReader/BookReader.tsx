@@ -3,9 +3,16 @@ import { Asset } from "expo-asset";
 import * as FileSystem from "expo-file-system";
 import * as React from "react";
 import { FunctionComponent, useEffect, useState } from "react";
-import { NativeSyntheticEvent, Platform, StyleSheet, Text } from "react-native";
+import {
+    ActivityIndicator,
+    NativeSyntheticEvent,
+    Platform,
+    StyleSheet,
+    Text,
+} from "react-native";
 import { WebView } from "react-native-webview";
 import { WebViewMessage } from "react-native-webview/lib/WebViewTypes";
+import { Colors } from "../../constants/Colors";
 import { RootStackParamList } from "../../navigationTypes";
 import { openBookForReading, OPEN_BOOK_DIR } from "../../storage/BookStorage";
 import * as ErrorLog from "../../util/ErrorLog";
@@ -363,7 +370,7 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
             ) : (
                 <>
                     {isLoading ? (
-                        <Text>Loading...</Text>
+                        <ActivityIndicator color={Colors.bloomRed} />
                     ) : (
                         <WebView
                             style={styles.webViewStyles}

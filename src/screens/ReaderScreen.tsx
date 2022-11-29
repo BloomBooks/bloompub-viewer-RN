@@ -18,7 +18,7 @@ export const ReaderScreen: FunctionComponent<ReaderScreenProps> = ({
             flex: 1,
             height: windowSize.height,
             width: windowSize.width,
-            backgroundColor: "#fff",
+            backgroundColor: "#2e2e2e",
         },
     });
 
