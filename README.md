@@ -22,8 +22,8 @@ yarn start
 -   Instead, download a custom build APK from the Expo account.
 -   Install it (there may be a ton of security warnings to dismiss since you're installing an APK outside of the play store and from an unknown developer) and open the app.
 -   On dev machine, run "yarn start"
--   (If needed) Modify Network settings according to https://stackoverflow.com/questions/47966887/expo-lan-configuration-doesnt-work-for-new-reactnative-project (Ensure "Private" not "Public", change IPv4 Interface Metric to 5 instead of 4.
--   If needed, Restart server, restart Expo app, and re-scan QR code)
+-   (If needed) Modify Network settings according to https://stackoverflow.com/questions/47966887/expo-lan-configuration-doesnt-work-for-new-reactnative-project (Ensure "Private" not "Public", change IPv4 Interface Metric to 5 instead of Auto or 4.
+-   Re-scan the QR code. (if needed, Restart server and restart Expo app too)
 
 ## One-Time Setup for iOS
 
