@@ -188,11 +188,13 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
                             automaticallyAdjustContentInsets={false}
                             javaScriptEnabled={true}
                             allowFileAccess={true} // Needed for Android to access the bloomplayer.htm in cache dir
-                            allowFileAccessFromFileURLs={true} // Needed to load the HTM of the book. allowUniversalAccessFromFileURLs is fine too.
+                            allowFileAccessFromFileURLs={true} // Needed to load the book's HTM. allowUniversalAccessFromFileURLs is fine too.
+                            originWhitelist={["*"]} // Some widgets need this to load their content
+                            //
+                            // BloomReader-RN used these, but not sure if they're needed or not
                             // domStorageEnabled={true}
                             // mixedContentMode="always"
                             // allowUniversalAccessFromFileURLs={true}
-                            // originWhitelist={["*"]}
                         />
                     )}
                 </>
