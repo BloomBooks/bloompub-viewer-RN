@@ -1,3 +1,4 @@
+import { StatusBar } from "expo-status-bar";
 import * as React from "react";
 import { FunctionComponent } from "react";
 import { SafeAreaView, StyleSheet, useWindowDimensions } from "react-native";
@@ -23,6 +24,7 @@ export const ReaderScreen: FunctionComponent<ReaderScreenProps> = ({
 
     return (
         <SafeAreaView style={styles.container}>
+            <StatusBar hidden={true} />
             <BookReader
                 bloomPubPath={route.params.bookUrl}
                 navigation={navigation}
