@@ -1,3 +1,4 @@
+import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import { FunctionComponent } from "react";
 import {
@@ -72,6 +73,7 @@ export const StartScreen: FunctionComponent<HomeScreenProps> = ({
 
     return (
         <View style={styles.startScreen}>
+            <StatusBar style="auto" />
             <Image
                 style={styles.logo}
                 source={require("../../assets/wordmark.png")}
