@@ -13,7 +13,11 @@ const App = () => {
         <NavigationContainer>
             <RootStack.Navigator initialRouteName="Home" id="PUBViewer">
                 <RootStack.Screen name="Home" component={StartScreen} />
-                <RootStack.Screen name="Read" component={ReaderScreen} />
+                <RootStack.Screen
+                    name="Read"
+                    component={ReaderScreen}
+                    options={{ headerShown: false }}
+                />
                 <RootStack.Screen name="Library" component={LibraryScreen} />
             </RootStack.Navigator>
         </NavigationContainer>
