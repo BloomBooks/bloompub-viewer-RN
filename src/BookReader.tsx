@@ -5,7 +5,7 @@ import { FunctionComponent, useEffect, useState } from "react";
 import { Platform, StyleSheet, Text } from "react-native";
 import { WebView } from "react-native-webview";
 import { openBookForReading, OPEN_BOOK_DIR } from "./storage/BookStorage";
-import { readAssetContentsAsync } from "./storage/Utils";
+import { copyAssetAsync, readAssetContentsAsync } from "./storage/Utils";
 
 interface BookReaderProps {
     bloomPubPath: string;
@@ -122,25 +122,38 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
                         // eslint-disable-next-line @typescript-eslint/no-var-requires
                         require("../dist/bloom-player/bloomplayer.htm")
                     );
-                    const bloomPlayerHtmContents = await readAssetContentsAsync(
-                        bloomPlayerHtmAsset
-                    );
 
-                    if (!bloomPlayerHtmContents) {
-                        return;
-                    }
-
-                    FileSystem.makeDirectoryAsync(ANDROID_BLOOM_PLAYER_FOLDER, {
-                        intermediates: true,
+                    await ensureBPFolderAsync();
+                    await copyAssetAsync({
+                        asset: bloomPlayerHtmAsset,
+                        to: ANDROID_BLOOM_PLAYER_PATH,
                     });
-                    await FileSystem.writeAsStringAsync(
-                        ANDROID_BLOOM_PLAYER_PATH,
-                        bloomPlayerHtmContents
-                    );
                     setBloomPlayerHtmReady(true);
                 };
 
                 loadBloomPlayerHtmAsync();
+
+                // Copy audio assets to same folder as bloomplayer.htm
+                // TODO: Verify that iOS doesn't need this
+                const audioAssets = [
+                    Asset.fromModule(
+                        // eslint-disable-next-line @typescript-eslint/no-var-requires
+                        require("../dist/bloom-player/right_answer-913c37e88e2939122d763361833efd24.mp3")
+                    ),
+                    Asset.fromModule(
+                        // eslint-disable-next-line @typescript-eslint/no-var-requires
+                        require("../dist/bloom-player/wrong_answer-f96cfc1e0cc2cea2dd523d521d4c8738.mp3")
+                    ),
+                ];
+                audioAssets.forEach(async (asset) => {
+                    const destPath = `${ANDROID_BLOOM_PLAYER_FOLDER}/${asset.name}.${asset.type}`;
+
+                    await ensureBPFolderAsync();
+                    copyAssetAsync({
+                        asset,
+                        to: destPath,
+                    });
+                });
             }
         },
         // don't bother setting the uri or loading the jsAsset unless we've unzipped something.
@@ -194,4 +207,9 @@ const styles = StyleSheet.create({
     },
 });
 
+async function ensureBPFolderAsync() {
+    return FileSystem.makeDirectoryAsync(ANDROID_BLOOM_PLAYER_FOLDER, {
+        intermediates: true,
+    });
+}
 export default BookReader;
