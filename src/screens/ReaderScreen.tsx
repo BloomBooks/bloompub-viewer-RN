@@ -4,6 +4,7 @@ import { FunctionComponent } from "react";
 import { SafeAreaView, StyleSheet, useWindowDimensions } from "react-native";
 import { ReaderScreenProps } from "../navigationTypes";
 import BookReader from "../components/BookReader/BookReader";
+import { Colors } from "../constants/Colors";
 
 export const ReaderScreen: FunctionComponent<ReaderScreenProps> = ({
     navigation,
@@ -18,7 +19,7 @@ export const ReaderScreen: FunctionComponent<ReaderScreenProps> = ({
             flex: 1,
             height: windowSize.height,
             width: windowSize.width,
-            backgroundColor: "#fff",
+            backgroundColor: Colors.bloomGrey,
         },
     });
 
