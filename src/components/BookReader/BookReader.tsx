@@ -130,11 +130,9 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
 
                 // window.postMessage is deprecated, need window.ReactNativeWebView now instead. See https://stackoverflow.com/a/57227576
                 const postMessageWorkaroundJavascript = `\n
-(function() {
-    window.postMessage = function(data) {
-        window.ReactNativeWebView.postMessage(data);
-    };
-})()`;
+window.postMessage = function(data) {
+    window.ReactNativeWebView.postMessage(data);
+};`;
                 setBloomPlayerJS(
                     jsFileContents +
                         postMessageWorkaroundJavascript +
