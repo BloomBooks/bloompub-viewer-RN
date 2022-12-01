@@ -19,7 +19,7 @@ export const LibraryScreen: FunctionComponent<LibraryScreenProps> = () => {
         },
     });
 
-    const libraryUrl = "bloomlibrary.org";
+    const libraryUrl = "https://bloomlibrary.org";
 
     alert(
         "After downloading a book for offline reading, go back to the Home screen."

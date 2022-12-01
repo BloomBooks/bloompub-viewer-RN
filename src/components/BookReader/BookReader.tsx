@@ -27,13 +27,11 @@ interface BookReaderProps {
     >;
 }
 
-const ANDROID_BLOOM_PLAYER_FOLDER = FileSystem.cacheDirectory + "bloomPlayer";
-const ANDROID_BLOOM_PLAYER_PATH = `${ANDROID_BLOOM_PLAYER_FOLDER}/bloomplayer.htm`;
+const BLOOM_PLAYER_FOLDER = FileSystem.cacheDirectory + "bloomPlayer";
+const BLOOM_PLAYER_PATH = `${BLOOM_PLAYER_FOLDER}/bloomplayer.htm`;
 
 export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
-    const [bloomPlayerHtmReady, setBloomPlayerHtmReady] = useState(
-        Platform.OS !== "android"
-    );
+    const [bloomPlayerHtmReady, setBloomPlayerHtmReady] = useState(false);
     const [bloomPlayerJS, setBloomPlayerJS] = useState("");
     const [bookHtmPath, setBookHtmPath] = useState("");
     const [uri, setUri] = useState("");
@@ -41,17 +39,6 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
     const [error, setError] = useState<string | null>(null);
 
     //console.log('in BookReader');
-    // react-native-webview has a bug on Android where local URI sources print out the HTML as text instead of as HTML
-    // (See https://github.com/react-native-webview/react-native-webview/issues/428 and https://github.com/react-native-webview/react-native-webview/issues/518)
-    // To work around it, we copy the HTM from dist into an HTM in the cache folder,
-    // then point to the HTM path in the cache folder.
-    const baseUri =
-        Platform.OS === "android"
-            ? ANDROID_BLOOM_PLAYER_PATH + "?"
-            : Asset.fromModule(
-                  // eslint-disable-next-line @typescript-eslint/no-var-requires
-                  require("../../../dist/bloom-player/bloomplayer.htm")
-              ).uri;
 
     useEffect(() => {
         // Unzip .bloompub and get the path to the HTM file inside the .bloompub
@@ -64,10 +51,7 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
                 return;
             }
             console.log("unzippedbook at: " + unzippedBookFolderPath);
-            if (Platform.OS === "android") {
-                // TODO: check to see if this is necessary on ios or not, might not be...
-                unzippedBookFolderPath = "file://" + unzippedBookFolderPath;
-            }
+            unzippedBookFolderPath = "file://" + unzippedBookFolderPath;
 
             // let directoryContents: string[] = [];
             // try {
@@ -90,9 +74,17 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
                 filename.endsWith(".htm")
             );
             if (htmFiles.length > 0) {
-                const htmPath = htmFiles[0];
-                console.log("bookHtmPath: " + htmPath);
-                setBookHtmPath(htmPath);
+                // TODO: This is just the filename, not the path
+                const htmFilename = htmFiles[0];
+                console.log("bookHtmPath: " + htmFilename);
+
+                // iOS doesn't read filenames with space, by default.
+                const newBookFilename =
+                    Platform.OS === "ios"
+                        ? htmFilename.replace(/ /g, "%20")
+                        : htmFilename;
+
+                setBookHtmPath(newBookFilename);
             } else {
                 setError("Couldn't find any HTM files in book");
             }
@@ -106,7 +98,7 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
             //const dirLessFile = OPEN_BOOK_DIR.substring(7); // experimented with 7 and 8 here
             //const encodedPath = encodeURI(`${dirLessFile}/${bookHtmPath}`);
             const encodedPath = encodeURI(`${OPEN_BOOK_DIR}/${bookHtmPath}`);
-            const uri = `${baseUri}&url=${encodedPath}&centerVertically=true&showBackButton=true&independent=false&host=bloompubviewer`;
+            const uri = `${BLOOM_PLAYER_PATH}?url=${encodedPath}&centerVertically=true&showBackButton=true&independent=false&host=bloompubviewer`;
 
             // TODO: Are any of these params desired?
             // &useOriginalPageSize=true&allowToggleAppBar=true&lang=en&hideFullScreenButton=false
@@ -141,47 +133,54 @@ window.postMessage = function(data) {
             };
             loadBloomPlayerAssetAsync();
 
-            if (Platform.OS === "android") {
-                // Copy HTM from dist to cache
-                // (Special workaround for react-native-webview bug preventing loading the dist version directly)
-                const loadBloomPlayerHtmAsync = async () => {
-                    const bloomPlayerHtmAsset = Asset.fromModule(
-                        // eslint-disable-next-line @typescript-eslint/no-var-requires
-                        require("../../../dist/bloom-player/bloomplayer.htm")
-                    );
+            // Copy HTM from dist to cache
+            // Both Android and iOS need this for separate reasons
+            // Android:
+            //   react-native-webview has a bug on Android where local URI sources print out the HTML as text instead of as HTML
+            //   (See https://github.com/react-native-webview/react-native-webview/issues/428 and https://github.com/react-native-webview/react-native-webview/issues/518)
+            //   To work around it, we copy the HTM from dist into an HTM in the cache folder,
+            //   then point to the HTM path in the cache folder.
+            // iOS
+            //   Because of Webview's allowingReadAccessToURL prop,
+            //   we want both Bloom Player and the book to be under the same directory, so we copy it to the cache directory.
 
-                    await ensureBPFolderAsync();
-                    await copyAssetAsync({
-                        asset: bloomPlayerHtmAsset,
-                        to: ANDROID_BLOOM_PLAYER_PATH,
-                    });
-                    setBloomPlayerHtmReady(true);
-                };
+            const loadBloomPlayerHtmAsync = async () => {
+                const bloomPlayerHtmAsset = Asset.fromModule(
+                    // eslint-disable-next-line @typescript-eslint/no-var-requires
+                    require("../../../dist/bloom-player/bloomplayer.htm")
+                );
 
-                loadBloomPlayerHtmAsync();
-
-                // Copy audio assets to same folder as bloomplayer.htm
-                // TODO: Verify that iOS doesn't need this
-                const audioAssets = [
-                    Asset.fromModule(
-                        // eslint-disable-next-line @typescript-eslint/no-var-requires
-                        require("../../../dist/bloom-player/right_answer-913c37e88e2939122d763361833efd24.mp3")
-                    ),
-                    Asset.fromModule(
-                        // eslint-disable-next-line @typescript-eslint/no-var-requires
-                        require("../../../dist/bloom-player/wrong_answer-f96cfc1e0cc2cea2dd523d521d4c8738.mp3")
-                    ),
-                ];
-                audioAssets.forEach(async (asset) => {
-                    const destPath = `${ANDROID_BLOOM_PLAYER_FOLDER}/${asset.name}.${asset.type}`;
-
-                    await ensureBPFolderAsync();
-                    copyAssetAsync({
-                        asset,
-                        to: destPath,
-                    });
+                await ensureBPFolderAsync();
+                await copyAssetAsync({
+                    asset: bloomPlayerHtmAsset,
+                    to: BLOOM_PLAYER_PATH,
                 });
-            }
+                setBloomPlayerHtmReady(true);
+            };
+
+            loadBloomPlayerHtmAsync();
+
+            // Copy audio assets to same folder as bloomplayer.htm
+            // TODO: Verify that iOS doesn't need this
+            const audioAssets = [
+                Asset.fromModule(
+                    // eslint-disable-next-line @typescript-eslint/no-var-requires
+                    require("../../../dist/bloom-player/right_answer-913c37e88e2939122d763361833efd24.mp3")
+                ),
+                Asset.fromModule(
+                    // eslint-disable-next-line @typescript-eslint/no-var-requires
+                    require("../../../dist/bloom-player/wrong_answer-f96cfc1e0cc2cea2dd523d521d4c8738.mp3")
+                ),
+            ];
+            audioAssets.forEach(async (asset) => {
+                const destPath = `${BLOOM_PLAYER_FOLDER}/${asset.name}.${asset.type}`;
+
+                await ensureBPFolderAsync();
+                copyAssetAsync({
+                    asset,
+                    to: destPath,
+                });
+            });
         },
         // don't bother setting the uri or loading the jsAsset unless we've unzipped something.
         [bookHtmPath]
@@ -353,7 +352,11 @@ window.postMessage = function(data) {
     //     }
     // }
 
-    const isLoading = uri === "" || !bloomPlayerHtmReady || !bloomPlayerJS;
+    const isLoading =
+        uri === "" ||
+        bookHtmPath === "" ||
+        !bloomPlayerHtmReady ||
+        !bloomPlayerJS;
 
     if (!isLoading && bloomPlayerJS.length <= 0) {
         // I think Webview only injects the Javascript on the first time,
@@ -380,6 +383,19 @@ window.postMessage = function(data) {
                             allowFileAccess={true} // Needed for Android to access the bloomplayer.htm in cache dir
                             allowFileAccessFromFileURLs={true} // Needed to load the book's HTM. allowUniversalAccessFromFileURLs is fine too.
                             originWhitelist={["*"]} // Some widgets need this to load their content
+                            // allowingReadAccessToURL is an iOS only prop.
+                            // At a high level, under many conditions, file:// requests other than the {source URI} won't work unless its path or a parent directory path
+                            // is granted explicit access via allowingReadAccessToURL
+                            // If the source is a file:// URI
+                            //    If this prop is NOT specified, then Webkit (iOS) only gives access to the source URI by default.
+                            //    If this prop IS specified, then Webkit (iOS) gives access to the path specified by this prop
+                            //       Beware: It seems that if Source URI is not under this path, then the Source URI won't be loaded at all!
+                            // If the source is a http:// URI
+                            //    It seems that no file:// URI's can be loaded, regardless of what allowingReadAccessToUrl says
+                            //    During development, the assets are served via http:// to the development machine,
+                            //       so using a mix of http:// for Bloom Player and file:// for the book is highly problematic!
+                            //       An easy way to resolve this is to serve Bloom Player via file:// from the cache directory, same as the book.
+                            allowingReadAccessToURL={FileSystem.cacheDirectory!}
                             onMessage={onMessageReceived}
                             //
                             // BloomReader-RN used these, but not sure if they're needed or not
@@ -401,7 +417,7 @@ const styles = StyleSheet.create({
 });
 
 async function ensureBPFolderAsync() {
-    return FileSystem.makeDirectoryAsync(ANDROID_BLOOM_PLAYER_FOLDER, {
+    return FileSystem.makeDirectoryAsync(BLOOM_PLAYER_FOLDER, {
         intermediates: true,
     });
 }
