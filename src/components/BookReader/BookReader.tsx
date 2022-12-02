@@ -32,65 +32,17 @@ const BLOOM_PLAYER_PATH = `${BLOOM_PLAYER_FOLDER}/bloomplayer.htm`;
 
 export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
     const [isBloomPlayerReady, setIsBloomPlayerReady] = useState(false);
-    const [bookHtmPath, setBookHtmPath] = useState("");
     const [uri, setUri] = useState("");
 
     const [error, setError] = useState<string | null>(null);
 
     //console.log('in BookReader');
 
-    useEffect(() => {
-        // Unzip .bloompub and get the path to the HTM file inside the .bloompub
-        const openBookFromStorageAsync = async () => {
-            let unzippedBookFolderPath = await openBookForReading(
-                props.bloomPubPath
-            );
-            if (unzippedBookFolderPath === "failed") {
-                setError("Failed to unzip book");
-                return;
-            }
-            console.log("unzippedbook at: " + unzippedBookFolderPath);
-            unzippedBookFolderPath = "file://" + unzippedBookFolderPath;
+    // Enhance: We only do the loadBloomPlayer useEffect once per component,
+    // but every time we re-navigate to the Read screen, this will re-run. (I guess it's a new component?)
+    // It'd be nice if it only ran once each time the app was opened.
 
-            const directoryContents = await FileSystem.readDirectoryAsync(
-                unzippedBookFolderPath
-            );
-            const htmFiles = directoryContents.filter((filename) =>
-                filename.endsWith(".htm")
-            );
-            if (htmFiles.length > 0) {
-                const htmFilename = htmFiles[0];
-                console.log("bookHtmPath: " + htmFilename);
-
-                // iOS doesn't read filenames with space, by default.
-                const newBookFilename =
-                    Platform.OS === "ios"
-                        ? htmFilename.replace(/ /g, "%20")
-                        : htmFilename;
-
-                setBookHtmPath(newBookFilename);
-            } else {
-                setError("Couldn't find any HTM files in book");
-            }
-        };
-        openBookFromStorageAsync();
-    }, []);
-
-    useEffect(
-        () => {
-            if (bookHtmPath === "") return; // not ready yet
-            const encodedPath = encodeURI(`${OPEN_BOOK_DIR}/${bookHtmPath}`);
-            const uri = `${BLOOM_PLAYER_PATH}?url=${encodedPath}&centerVertically=true&showBackButton=true&independent=false&host=bloompubviewer`;
-
-            // TODO: Are any of these params desired?
-            // &useOriginalPageSize=true&allowToggleAppBar=true&lang=en&hideFullScreenButton=false
-
-            console.log("Read uri: " + uri);
-            setUri(uri);
-        },
-        [bookHtmPath] // don't bother setting the uri unless we've unzipped something.
-    );
-
+    // Load Bloom Player assets
     useEffect(() => {
         // Copy Bloom Player from dist to cache
         // Both Android and iOS need this for separate reasons
@@ -102,7 +54,7 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
         // iOS
         //   Because of Webview's allowingReadAccessToURL prop,
         //   we want both Bloom Player and the book to be under the same directory, so we copy Bloom Player to the cache directory.
-        const copyBloomPlayerAssetsAsync = async () => {
+        const loadBloomPlayerAsync = async () => {
             // Clearing the Bloom Player folder is optional in production,
             // but useful in development to ensure we're starting from a clean folder.
             await FileSystem.deleteAsync(BLOOM_PLAYER_FOLDER, {
@@ -124,8 +76,59 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
 
             setIsBloomPlayerReady(true);
         };
-        copyBloomPlayerAssetsAsync();
-    }, []); // Only do this once
+        loadBloomPlayerAsync();
+    }, []);
+
+    useEffect(() => {
+        // Unzip .bloompub and get the path to the HTM file inside the .bloompub
+        const loadBookAsync = async () => {
+            const unzippedBookFolderPath = await openBookForReading(
+                props.bloomPubPath
+            );
+            if (unzippedBookFolderPath === "failed") {
+                setError("Failed to unzip book");
+                return;
+            }
+            console.log("unzippedbook at: " + unzippedBookFolderPath);
+
+            const directoryContents = await FileSystem.readDirectoryAsync(
+                "file://" + unzippedBookFolderPath
+            );
+            const htmFiles = directoryContents.filter((filename) =>
+                filename.endsWith(".htm")
+            );
+            if (htmFiles.length === 0) {
+                setError("Couldn't find any HTM files in book");
+            }
+            const htmFilename = htmFiles[0];
+            console.log("bookHtmPath: " + htmFilename);
+
+            // iOS doesn't read filenames with space, by default.
+            const newBookFilename =
+                Platform.OS === "ios"
+                    ? htmFilename.replace(/ /g, "%20")
+                    : htmFilename;
+
+            return newBookFilename;
+        };
+
+        const setUriFromBookHtmPath = (bookHtmPath: string | undefined) => {
+            if (!bookHtmPath) {
+                return;
+            }
+
+            const encodedPath = encodeURI(`${OPEN_BOOK_DIR}/${bookHtmPath}`);
+
+            // Additional params that might possibly be useful, or might not
+            // &useOriginalPageSize=true&allowToggleAppBar=true&lang=en&hideFullScreenButton=false
+            const newUri = `${BLOOM_PLAYER_PATH}?url=${encodedPath}&centerVertically=true&showBackButton=true&independent=false&host=bloompubviewer`;
+
+            console.log("Read uri: " + newUri);
+            setUri(newUri);
+        };
+
+        loadBookAsync().then(setUriFromBookHtmPath);
+    }, [props.bloomPubPath]);
 
     function onMessageReceived(event: NativeSyntheticEvent<WebViewMessage>) {
         try {
@@ -293,7 +296,7 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
     //     }
     // }
 
-    const isLoading = uri === "" || !isBloomPlayerReady || bookHtmPath === "";
+    const isLoading = uri === "" || !isBloomPlayerReady;
 
     const postMessageWorkaroundJavascript = `
 window.postMessage = function(data) {
