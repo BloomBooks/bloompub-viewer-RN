@@ -52,28 +52,13 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
             console.log("unzippedbook at: " + unzippedBookFolderPath);
             unzippedBookFolderPath = "file://" + unzippedBookFolderPath;
 
-            // let directoryContents: string[] = [];
-            // try {
-            //     const dirInfo = await FileSystem.getInfoAsync(
-            //         unzippedBookFolderPath
-            //     );
-            //     if (dirInfo.isDirectory) {
-            //         console.log("Is a directory! size is:" + dirInfo.size);
-            //     }
             const directoryContents = await FileSystem.readDirectoryAsync(
                 unzippedBookFolderPath
             );
-            // } catch (error) {
-            //     console.error(`readDirectoryAsync error: ${error}`);
-            // }
-            // console.log(
-            //     "directoryContents: " + JSON.stringify(directoryContents)
-            // );
             const htmFiles = directoryContents.filter((filename) =>
                 filename.endsWith(".htm")
             );
             if (htmFiles.length > 0) {
-                // TODO: This is just the filename, not the path
                 const htmFilename = htmFiles[0];
                 console.log("bookHtmPath: " + htmFilename);
 
