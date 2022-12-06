@@ -99,7 +99,7 @@ export const StartScreen: FunctionComponent<HomeScreenProps> = ({
                         source={require("../../assets/Search.png")}
                     />
                     <Text style={styles.text}>
-                        Get BloomPUB books on BloomLibrary.org
+                        Get more books from our library
                     </Text>
                 </View>
             </TouchableHighlight>
