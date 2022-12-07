@@ -339,6 +339,7 @@ window.postMessage = function(data) {
                             //       An easy way to resolve this is to serve Bloom Player via file:// from the cache directory, same as the book.
                             allowingReadAccessToURL={FileSystem.cacheDirectory!}
                             onMessage={onMessageReceived}
+                            mediaPlaybackRequiresUserAction={false}
                             //
                             // BloomReader-RN used these, but not sure if they're needed or not
                             // domStorageEnabled={true}
