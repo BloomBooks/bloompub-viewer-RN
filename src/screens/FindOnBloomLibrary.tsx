@@ -4,6 +4,7 @@ import {
     HeaderBackButton,
     HeaderBackButtonProps,
 } from "@react-navigation/elements";
+import * as FileSystem from "expo-file-system";
 import * as React from "react";
 import { FunctionComponent } from "react";
 import {
@@ -11,7 +12,6 @@ import {
     Platform,
     PlatformColor,
     SafeAreaView,
-    StyleSheet,
     useWindowDimensions,
 } from "react-native";
 import { z } from "zod";
@@ -21,12 +21,30 @@ import WebView, {
     WebViewNavigation,
 } from "react-native-webview";
 import { WithMessageZ } from "../externalContext";
-import { WebViewProgressEvent } from "react-native-webview/lib/WebViewTypes";
+import {
+    FileDownloadEvent,
+    WebViewProgressEvent,
+} from "react-native-webview/lib/WebViewTypes";
+import { ensureFolderAsync } from "../util/FileUtil";
+import { Path } from "../util/Path";
+import { Locations } from "../constants/Locations";
+import { Snackbar } from "react-native-paper";
+import { DownloadProgressView } from "../components/DownloadProgressView";
+import EStyleSheet from "react-native-extended-stylesheet";
+import { Spacing } from "../constants/Spacing";
 
 export const LibraryScreen: FunctionComponent<LibraryScreenProps> = ({
     navigation,
 }) => {
     const [canWebviewGoBack, setCanWebviewGoBack] = React.useState(false);
+    const [downloadStarted, setDownloadStarted] = React.useState(false);
+    const [downloadProgress, setDownloadProgress] = React.useState(0);
+    const [downloadComplete, setDownloadComplete] = React.useState(false);
+    const [downloadBookTitle, setDownloadBookTitle] = React.useState("");
+    const [downloadDestination, setDownloadDestination] = React.useState("");
+    const [downloadResumable, setDownloadResumable] = React.useState<
+        FileSystem.DownloadResumable | undefined
+    >(undefined);
 
     const webViewRef = React.useRef<WebView>(null);
 
@@ -34,20 +52,34 @@ export const LibraryScreen: FunctionComponent<LibraryScreenProps> = ({
     // should we ever have need of them.
     const windowSize = useWindowDimensions();
 
-    const styles = StyleSheet.create({
+    const styles = EStyleSheet.create({
         container: {
             flex: 1,
             height: windowSize.height,
             width: windowSize.width,
             backgroundColor: "#fff",
         },
+        snackbar: {
+            bottom: "4.5rem",
+            marginHorizontal: Spacing.ExtraLarge,
+            // ENHANCE: In BR Android, this slightly overlaps DownloadProgressView,
+            // appears above it, and the overlapping area has an even darker color.
+        },
+        hidden: {
+            display: "none",
+        },
     });
 
-    const host = "https://bloomlibrary.org";
-    //const host = "https://alpha.bloomlibrary.org";
+    // const host = "https://bloomlibrary.org";
+    const host = "https://alpha.bloomlibrary.org";
+    // const host = "https://dev-alpha.bloomlibrary.org";
     const libraryUrl = host + "/app-hosted-v1/langs";
 
     React.useEffect(() => {
+        if (Platform.OS === "ios") {
+            return;
+        }
+
         alert(
             "After downloading a book for offline reading, go back to the Home screen."
         );
@@ -164,6 +196,66 @@ headObserver.observe(headDom, {
         // in iOS, canGoBack doesn't seem to have the right value here, so just use onNavigationStateChange for iOS
         setCanWebviewGoBack(event.nativeEvent.canGoBack);
     };
+
+    const downloadBookAsync = async (bloomPubUrl: string) => {
+        const fileName = Path.getFileName(bloomPubUrl);
+
+        // What if fileName contains "+" symbols instead of spaces?
+        // Well, I figure it's going to get used as a file:// protocol URL for a while still,
+        // so probably better to keep them encoded as "+" indefinitely,
+        // at least until something user-presentable needs to be generated.
+
+        // Ensure it ends with .bloompub, if it doesn't already.
+        // (e.g. older ".bloomd" format)
+        const bloomPubFileName = Path.changeExtension(fileName, "bloompub");
+        await ensureFolderAsync(Locations.BooksFolder);
+        const filePath = Path.join(Locations.BooksFolder, bloomPubFileName);
+        setDownloadDestination(filePath);
+
+        const decodedTitle = decodeURIComponent(getTitleFromName(fileName));
+        setDownloadBookTitle(decodedTitle);
+
+        const onProgressCallback = (downloadProgress: {
+            totalBytesWritten: number;
+            totalBytesExpectedToWrite: number;
+        }) => {
+            const { totalBytesWritten, totalBytesExpectedToWrite } =
+                downloadProgress;
+            if (totalBytesExpectedToWrite === 0) {
+                // Paranoia
+                if (totalBytesWritten >= totalBytesExpectedToWrite) {
+                    setDownloadProgress(1); // I guess it's technically completed?
+                } else {
+                    setDownloadProgress(0);
+                }
+
+                return;
+            }
+
+            const progress = totalBytesWritten / totalBytesExpectedToWrite;
+            setDownloadProgress(progress);
+        };
+        setDownloadStarted(true);
+        const resumableDownload = FileSystem.createDownloadResumable(
+            bloomPubUrl,
+            filePath,
+            undefined,
+            onProgressCallback
+        );
+        setDownloadResumable(resumableDownload);
+        const downloadResult = await resumableDownload.downloadAsync();
+
+        if (!downloadResult) {
+            // maybe cancelled?
+            return;
+        }
+        console.assert(downloadResult.status === 200);
+
+        setDownloadComplete(true);
+        setDownloadProgress(1.0); // just in case
+        setDownloadResumable(undefined);
+    };
+
     return (
         <SafeAreaView style={styles.container}>
             <WebView
@@ -185,6 +277,51 @@ headObserver.observe(headDom, {
                 onLoadProgress={
                     Platform.OS === "android" ? onLoadProgress : undefined
                 }
+                onFileDownload={async (event: FileDownloadEvent) => {
+                    // This function only gets called on iOS.
+                    return downloadBookAsync(event.nativeEvent.downloadUrl);
+                }}
+            />
+            {/* ENHANCE: The toast in BR Android includes a logo as well. */}
+            <Snackbar
+                style={[styles.snackbar]}
+                visible={downloadComplete}
+                elevation={4}
+                onDismiss={() => {
+                    setDownloadComplete(false);
+                }}
+            >
+                {`${downloadBookTitle} added or updated`}
+            </Snackbar>
+            <DownloadProgressView
+                visible={downloadStarted}
+                message={
+                    !downloadComplete
+                        ? `Downloading ${downloadBookTitle}`
+                        : "Book download is complete"
+                }
+                progress={downloadProgress}
+                loadingAction={{
+                    label: "Cancel",
+                    onPress: async () => {
+                        if (!downloadResumable) {
+                            return;
+                        }
+                        await downloadResumable.cancelAsync();
+
+                        setDownloadResumable(undefined);
+                        setDownloadStarted(false);
+                        setDownloadProgress(0);
+                    },
+                }}
+                doneAction={{
+                    label: "Read Now",
+                    onPress: () => {
+                        navigation.navigate("Read", {
+                            bookUrl: downloadDestination,
+                        });
+                    },
+                }}
             />
         </SafeAreaView>
     );
@@ -195,4 +332,19 @@ const TitleChangeMessageZ = WithMessageZ.extend({
     title: z.string(),
 });
 
+// A translation of BloomReader's DownloadProgressView's titleFromName
+const getTitleFromName = (name: string) => {
+    // Filenames from BL commonly contain plus signs for spaces.
+    // Nearly always things will be more readable if we replace them.
+    // A sequence of three plus signs might indicate that the name really had a plus sign.
+    // But it might equally indicate a sequence of undesirable characters that each got
+    // changed to a space to make a file name. (We had some code briefly to treat three
+    // plus signs specially, but got bad results for an Adangbe book called "Bɔ++++kuu.bloompub".)
+    let result = name.replace(/\+/, " ");
+    // The above might just possibly have produced a sequence of several spaces.
+    while (result.indexOf("  ") >= 0) result = result.replace("  ", " ");
+    // We don't need a file extension in the name.
+    result = result.replace(".bloompub", "").replace(".bloomd", "");
+    return result;
+};
 export default LibraryScreen;
