@@ -5,7 +5,6 @@ import { FunctionComponent, useEffect, useState } from "react";
 import {
     ActivityIndicator,
     NativeSyntheticEvent,
-    Platform,
     StyleSheet,
 } from "react-native";
 import { Banner, useTheme } from "react-native-paper";
@@ -16,7 +15,7 @@ import { Colors } from "../../constants/Colors";
 import { BLOOM_PLAYER_FOLDER } from "../../constants/Locations";
 import { bloomDarkTheme } from "../../constants/Theme";
 import { RootStackParamList } from "../../navigationTypes";
-import { openBookForReading, OPEN_BOOK_DIR } from "../../storage/BookStorage";
+import { openBookForReading } from "../../storage/BookStorage";
 import * as ErrorLog from "../../util/ErrorLog";
 import { copyAssetAsync, ensureFolderAsync } from "../../util/FileUtil";
 import { Path } from "../../util/Path";
@@ -85,7 +84,7 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
 
     useEffect(() => {
         setError("");
-        // Unzip .bloompub and get the path to the HTM file inside the .bloompub
+        // Unzip .bloompub and returns the full path to the unzipped book's HTM file
         const loadBookAsync = async () => {
             /**
              * Component-specific wrapper around openBookForReading
@@ -161,15 +160,18 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
                 setError("Couldn't find any HTM files in book");
             }
             const htmFilename = htmFiles[0];
-            console.log("bookHtmPath: " + htmFilename);
+            console.log("htmFilename: " + htmFilename);
 
-            // iOS doesn't read filenames with space, by default.
-            const newBookFilename =
-                Platform.OS === "ios"
-                    ? htmFilename.replace(/ /g, "%20")
-                    : htmFilename;
+            // Generate the full path to the HTM file as a file:// protocol URL.
+            // Note that htmFilename gives the true filename, but if it contains special punctuation,
+            // it's not ready to be used as-is to go into a file:// URL. Encoding is needed.
+            const bookHtmPath = Path.join(
+                unzippedBookFolderPath,
+                encodeURIComponent(htmFilename)
+            );
+            console.log("bookHtmPath: " + bookHtmPath);
 
-            return newBookFilename;
+            return bookHtmPath;
         };
 
         const setUriFromBookHtmPath = (bookHtmPath: string | undefined) => {
@@ -177,14 +179,23 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
                 return;
             }
 
-            const encodedPath = encodeURI(`${OPEN_BOOK_DIR}/${bookHtmPath}`);
-
+            // The query params that come after the "?" in a bloomPlayer URL
+            const bloomPlayerParams: Record<string, string> = {
+                url: bookHtmPath,
+                centerVertically: "true",
+                showBackButton: "true",
+                independent: "false",
+                host: "bloompubviewer",
+            };
             // Additional params that might possibly be useful, or might not
             // &useOriginalPageSize=true&allowToggleAppBar=true&lang=en&hideFullScreenButton=false
-            const newUri = `${BLOOM_PLAYER_PATH}?url=${encodedPath}&centerVertically=true&showBackButton=true&independent=false&host=bloompubviewer`;
+            const queryParamsString = Object.entries(bloomPlayerParams)
+                .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+                .join("&");
 
-            console.log("Read uri: " + newUri);
-            setUri(newUri);
+            const bloomPlayerUri = `${BLOOM_PLAYER_PATH}?${queryParamsString}`;
+            console.log("Read uri: " + bloomPlayerUri);
+            setUri(bloomPlayerUri);
         };
 
         loadBookAsync().then(setUriFromBookHtmPath);
