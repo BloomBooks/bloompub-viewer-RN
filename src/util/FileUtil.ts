@@ -48,3 +48,9 @@ export async function copyAssetAsync(options: { asset: Asset; to: string }) {
         to,
     });
 }
+
+export async function ensureFolderAsync(folderPath: string) {
+    return FileSystem.makeDirectoryAsync(folderPath, {
+        intermediates: true,
+    });
+}
