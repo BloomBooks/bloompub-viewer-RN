@@ -24,7 +24,7 @@ interface BookReaderProps {
     bloomPubPath: string;
     navigation: NativeStackNavigationProp<
         RootStackParamList,
-        "Read",
+        "BookReader",
         "PUBViewer"
     >;
 }
@@ -86,6 +86,7 @@ export const BookReader: FunctionComponent<BookReaderProps> = (props) => {
         setError("");
         // Unzip .bloompub and returns the full path to the unzipped book's HTM file
         const loadBookAsync = async () => {
+            // TODO: Consider if we can refactor safeOpenBookForReading() to use BookStorage.extractToTmp instead?
             /**
              * Component-specific wrapper around openBookForReading
              * that catches any error and sets up component-specific error handling.

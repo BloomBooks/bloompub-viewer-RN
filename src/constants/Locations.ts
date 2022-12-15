@@ -8,4 +8,9 @@ export class Locations {
         FileSystem.documentDirectory!, // never null on Android or iOS, but returns null if on web.
         "Books"
     );
+
+    public static ThumbsFolder = Path.join(
+        FileSystem.documentDirectory!, // never null on Android or iOS, but returns null if on web.
+        "thumbs"
+    );
 }

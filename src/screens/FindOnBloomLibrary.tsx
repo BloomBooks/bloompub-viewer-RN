@@ -32,6 +32,8 @@ import { Snackbar } from "react-native-paper";
 import { DownloadProgressView } from "../components/DownloadProgressView";
 import EStyleSheet from "react-native-extended-stylesheet";
 import { Spacing } from "../constants/Spacing";
+import { BloomContext } from "../BloomContext";
+import { importBookToCollection } from "../models/BookCollection";
 
 export const LibraryScreen: FunctionComponent<LibraryScreenProps> = ({
     navigation,
@@ -47,6 +49,8 @@ export const LibraryScreen: FunctionComponent<LibraryScreenProps> = ({
     >(undefined);
 
     const webViewRef = React.useRef<WebView>(null);
+
+    const bloomContext = React.useContext(BloomContext);
 
     // Besides height and width, the object also contains scale and fontsize,
     // should we ever have need of them.
@@ -254,6 +258,12 @@ headObserver.observe(headDom, {
         setDownloadComplete(true);
         setDownloadProgress(1.0); // just in case
         setDownloadResumable(undefined);
+
+        const newCollection = await importBookToCollection(
+            filePath,
+            "AppHostedLibraryDownload"
+        );
+        bloomContext.setBookCollection(newCollection);
     };
 
     return (
@@ -317,7 +327,7 @@ headObserver.observe(headDom, {
                 doneAction={{
                     label: "Read Now",
                     onPress: () => {
-                        navigation.navigate("Read", {
+                        navigation.navigate("BookReader", {
                             bookUrl: downloadDestination,
                         });
                     },
