@@ -23,14 +23,14 @@ export function logError(options: Options): void {
     }
 }
 
-// export function logNewAppVersion(appVersion: string): void {
-//   const message =
-//     `  BloomReader version: ${appVersion}\n` +
-//     `  Device OS: ${Platform.OS}\n` +
-//     `  OS Version: ${Platform.Version}`;
+export function logNewAppVersion(appVersion: string): void {
+    const message =
+        `  BloomReader version: ${appVersion}\n` +
+        `  Device OS: ${Platform.OS}\n` +
+        `  OS Version: ${Platform.Version}`;
 
-//   writeToErrorLog(message);
-// }
+    writeToErrorLog(message);
+}
 
 // export async function emailLog(): Promise<void> {
 //   const errorLog = await getErrorLog();
@@ -71,4 +71,10 @@ async function writeToErrorLog(message: string): Promise<void> {
 
 function wrapMessage(message: string): string {
     return `== ${new Date().toString()} ==\n${message}\n\n`;
+}
+
+export function castUnknownErrorToString(err: unknown): string {
+    if (err === null) return "null";
+    else if (err == undefined) return "undefined";
+    else return err.toString();
 }

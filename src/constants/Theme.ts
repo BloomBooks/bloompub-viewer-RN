@@ -31,6 +31,7 @@ const bloomDarkThemeAndroid = {
     colors: {
         ...MD3DarkTheme.colors,
         primary: Colors.bloomRed,
+        background: Colors.bloomGrey,
         // ENHANCE: Figure out all the other colors to customize
     },
 };
