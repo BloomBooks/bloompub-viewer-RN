@@ -1,6 +1,12 @@
 import * as Application from "expo-application";
 import React, { FunctionComponent } from "react";
-import { SafeAreaView, View, Dimensions, Image } from "react-native";
+import {
+    SafeAreaView,
+    ScrollView,
+    View,
+    Dimensions,
+    Image,
+} from "react-native";
 import { Text } from "react-native-paper";
 import I18n from "../../i18n/i18n";
 import DrawerMenuItem from "./DrawerMenuItem";
@@ -23,27 +29,28 @@ export const DrawerMenu: FunctionComponent<DrawerContentComponentProps> = ({
 
     return (
         <SafeAreaView>
-            <View style={{ backgroundColor: "black", padding: 10 }}>
-                <Image
-                    source={require("../../../assets/bloom-reader-against-dark.png")}
-                    style={{
-                        width: imageWidth,
-                        height: imageHeight,
-                    }}
-                />
-                <Text style={{ color: "white" }}>
-                    {Application.nativeApplicationVersion}
-                </Text>
-            </View>
-            {/* Sharing is not supported in this version. */}
-            {/* <DrawerMenuItem
+            <ScrollView>
+                <View style={{ backgroundColor: "black", padding: 10 }}>
+                    <Image
+                        source={require("../../../assets/bloom-reader-against-dark.png")}
+                        style={{
+                            width: imageWidth,
+                            height: imageHeight,
+                        }}
+                    />
+                    <Text style={{ color: "white" }}>
+                        {Application.nativeApplicationVersion}
+                    </Text>
+                </View>
+                {/* Sharing is not supported in this version. */}
+                {/* <DrawerMenuItem
                     label={I18n.t("Receive books from computer")}
                     iconName="md-wifi"
                     onPress={() => {
                         this.props.navigation.navigate("ReceiveFromWifiScreen");
                     }}
                 /> */}
-            {/* <DrawerMenuItem
+                {/* <DrawerMenuItem
           label={I18n.t("Share Books")}
           iconName="md-share"
           onPress={() => {
@@ -59,77 +66,84 @@ export const DrawerMenu: FunctionComponent<DrawerContentComponentProps> = ({
             this.props.navigation.closeDrawer();
           }}
         /> */}
-            <DrawerMenuItem
-                label={I18n.t("Open BloomPUB file")}
-                // BR Android uses Bookshelf.png, but I wonder what about Open.png from bloompub-viewer
-                // iconSource={require("../../../assets/Open.png")}
-                iconSource={require("../../../assets/bookshelf.png")}
-                onPress={async () => {
-                    const bookUrl = await pickBloomPubAsync();
-                    if (!bookUrl) {
-                        return;
-                    }
+                <DrawerMenuItem
+                    label={I18n.t("Open BloomPUB file")}
+                    // BR Android uses Bookshelf.png, but I wonder what about Open.png from bloompub-viewer
+                    // iconSource={require("../../../assets/Open.png")}
+                    iconSource={require("../../../assets/bookshelf.png")}
+                    onPress={async () => {
+                        const bookUrl = await pickBloomPubAsync();
+                        if (!bookUrl) {
+                            return;
+                        }
 
-                    navigation.navigate("Main", {
-                        screen: "BookReader",
-                        params: {
-                            bookUrl,
-                        },
-                    });
-                }}
-            />
-            <View style={{ borderBottomWidth: 1, borderBottomColor: "gray" }} />
-            <DrawerMenuItem
-                label={I18n.t("Release Notes")}
-                onPress={
-                    () =>
-                        alert(
-                            "Pretending to open release notes. (Not implemented)"
-                        )
-                    // this.props.navigation.navigate("NotesScreen", {
-                    //   notes: Notes.ReleaseNotes
-                    // })
-                }
-            />
-            <DrawerMenuItem
-                label={I18n.t("About Bloom Reader")}
-                onPress={
-                    () =>
-                        alert(
-                            "Pretending to open About Bloom Reader. (Not implemented)"
-                        )
-                    // this.props.navigation.navigate("NotesScreen", {
-                    //     notes: Notes.AboutBloomReader,
-                    // })
-                }
-            />
-            <DrawerMenuItem
-                label={I18n.t("About Bloom")}
-                onPress={
-                    () =>
-                        alert(
-                            "Pretending to open About Bloom. (Not implemented)"
-                        )
-                    // this.props.navigation.navigate("NotesScreen", {
-                    //     notes: Notes.AboutBloom,
-                    // })
-                }
-            />
-            {/* <DrawerMenuItem
-                    label={I18n.t("About SIL")}
-                    onPress={() =>
-                        this.props.navigation.navigate("NotesScreen", {
-                            notes: Notes.AboutSIL,
-                        })
+                        navigation.navigate("Main", {
+                            screen: "BookReader",
+                            params: {
+                                bookUrl,
+                            },
+                        });
+                    }}
+                />
+                <View
+                    style={{ borderBottomWidth: 1, borderBottomColor: "gray" }}
+                />
+                <DrawerMenuItem
+                    label={I18n.t("Release Notes")}
+                    onPress={
+                        () =>
+                            alert(
+                                "Pretending to open release notes. (Not implemented)"
+                            )
+                        // this.props.navigation.navigate("NotesScreen", {
+                        //   notes: Notes.ReleaseNotes
+                        // })
                     }
-                /> */}
-            {/* <DrawerMenuItem
+                />
+                <DrawerMenuItem
+                    label={I18n.t("About Bloom Reader")}
+                    onPress={
+                        () =>
+                            alert(
+                                "Pretending to open About Bloom Reader. (Not implemented)"
+                            )
+                        // this.props.navigation.navigate("NotesScreen", {
+                        //     notes: Notes.AboutBloomReader,
+                        // })
+                    }
+                />
+                <DrawerMenuItem
+                    label={I18n.t("About Bloom")}
+                    onPress={
+                        () =>
+                            alert(
+                                "Pretending to open About Bloom. (Not implemented)"
+                            )
+                        // this.props.navigation.navigate("NotesScreen", {
+                        //     notes: Notes.AboutBloom,
+                        // })
+                    }
+                />
+                <DrawerMenuItem
+                    label={I18n.t("About SIL")}
+                    onPress={
+                        () =>
+                            alert(
+                                "Pretending to open About SIL. (Not implemented)"
+                            )
+                        // this.props.navigation.navigate("NotesScreen", {
+                        //     notes: Notes.AboutSIL,
+                        // })
+                    }
+                />
+                {/* <DrawerMenuItem
           label={I18n.t("Email Error Log")}
           onPress={() => {
             ErrorLog.emailLog();
             this.props.navigation.closeDrawer();
           }}
         /> */}
+            </ScrollView>
         </SafeAreaView>
     );
 };

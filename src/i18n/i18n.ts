@@ -55,6 +55,7 @@ export default class I18n {
         "Release Notes": "Release Notes",
         "About Bloom Reader": "About Bloom Reader",
         "About Bloom": "About Bloom",
+        "About SIL": "About SIL",
     };
 
     public static t(key: string): string {
