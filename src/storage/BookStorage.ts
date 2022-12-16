@@ -1,7 +1,13 @@
 import * as FileSystem from "expo-file-system";
 import { unzip } from "react-native-zip-archive";
 import { Locations } from "../constants/Locations";
-import { Book, BookFeatures, Shelf } from "../models/BookOrShelf";
+import {
+    Book,
+    BookFeatures,
+    BookOrShelf,
+    isShelf,
+    Shelf,
+} from "../models/BookOrShelf";
 import { androidExternalStorageDirs } from "../native_modules/AndroidExternalStorageDirsModule";
 import { castUnknownErrorToString, logError } from "../util/ErrorLog";
 import {
@@ -208,6 +214,14 @@ export async function fetchHtml(bookDir = OPEN_BOOK_DIR): Promise<string> {
 //       if (!isShelf(item) && item.thumbPath) rnfsSafeUnlink(item.thumbPath);
 //     });
 //   }
+
+export function deleteBooksAndShelves(items: BookOrShelf[]) {
+    items.forEach((item) => {
+        FileSystem.deleteAsync(item.filepath);
+        if (!isShelf(item) && item.thumbPath)
+            FileSystem.deleteAsync(item.thumbPath);
+    });
+}
 
 //   export function openBookFolderPath(): string {
 //     return OPEN_BOOK_DIR;

@@ -1,3 +1,4 @@
+import "react-native-gesture-handler"; // Must the first line! At least, according to its documentation
 import React from "react";
 import { Provider as PaperProvider } from "react-native-paper";
 import { RootSiblingParent } from "react-native-root-siblings";
@@ -77,8 +78,6 @@ const App = () => {
                                     shelf: undefined,
                                 }}
                                 options={{
-                                    // header: BookListHeader,  // TODO: Need a custom header with a bigger height
-                                    headerTitle: HeaderImage,
                                     headerStyle: {
                                         backgroundColor:
                                             bloomDarkTheme.colors.background,

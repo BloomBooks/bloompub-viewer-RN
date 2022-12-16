@@ -5,6 +5,8 @@ import Toast from "react-native-root-toast";
 import {
     Book,
     BookOrShelf,
+    isShelf,
+    recursiveListForShelf,
     Shelf,
     //   isShelf,
     //   recursiveListForShelf
@@ -92,21 +94,21 @@ export async function updateBookListFormatIfNeeded(
     await writeList(BOOK_LIST_KEY, newBookList);
 }
 
-// export async function deleteBookOrShelf(
-//   bookOrShelf: BookOrShelf
-// ): Promise<BookCollection> {
-//   const collection = await getBookCollection();
-//   const toDelete = itemsToDelete(bookOrShelf, collection);
-//   BookStorage.deleteBooksAndShelves(toDelete);
-//   collection.books = collection.books.filter(
-//     b => !toDelete.some(item => item.filepath == b.filepath)
-//   );
-//   collection.shelves = collection.shelves.filter(
-//     s => !toDelete.some(item => isShelf(item) && item.id == s.id)
-//   );
-//   writeCollection(collection);
-//   return collection;
-// }
+export async function deleteBookOrShelf(
+    bookOrShelf: BookOrShelf
+): Promise<BookCollection> {
+    const collection = await getBookCollection();
+    const toDelete = itemsToDelete(bookOrShelf, collection);
+    BookStorage.deleteBooksAndShelves(toDelete);
+    collection.books = collection.books.filter(
+        (b) => !toDelete.some((item) => item.filepath == b.filepath)
+    );
+    collection.shelves = collection.shelves.filter(
+        (s) => !toDelete.some((item) => isShelf(item) && item.id == s.id)
+    );
+    writeCollection(collection);
+    return collection;
+}
 
 function addToCollection(
     collection: BookCollection,
@@ -129,13 +131,13 @@ function addToCollection(
     return { books, shelves };
 }
 
-// function itemsToDelete(
-//   item: BookOrShelf,
-//   collection: BookCollection
-// ): BookOrShelf[] {
-//   if (isShelf(item)) return recursiveListForShelf(item, collection);
-//   else return [item];
-// }
+function itemsToDelete(
+    item: BookOrShelf,
+    collection: BookCollection
+): BookOrShelf[] {
+    if (isShelf(item)) return recursiveListForShelf(item, collection);
+    else return [item];
+}
 
 async function syncPublicDirs(
     collection: BookCollection
