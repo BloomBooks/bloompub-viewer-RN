@@ -9,7 +9,6 @@ export type MainStackParamList = {
     BookList: { shelf: Shelf | undefined }; // TODO: This shouldn't take a Shelf. It should take a ShelfID. But how do we get the shelf from a shelf ID?
     BookReader: { bookUrl: string };
     Library: undefined;
-    Home: undefined; // TODO: Deprecate me
 };
 
 export type BookListScreenProps = NativeStackScreenProps<
@@ -21,11 +20,6 @@ export type BookListScreenProps = NativeStackScreenProps<
 export type ReaderScreenProps = NativeStackScreenProps<
     MainStackParamList,
     "BookReader",
-    "MainStack"
->;
-export type HomeScreenProps = NativeStackScreenProps<
-    MainStackParamList,
-    "Home",
     "MainStack"
 >;
 export type LibraryScreenProps = NativeStackScreenProps<
