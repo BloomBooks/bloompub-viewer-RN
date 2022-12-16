@@ -1,12 +1,11 @@
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Shelf } from "./models/BookOrShelf";
 
-// export type RootStackParamList = {
-//     Home: undefined;
-//     Read: { bookUrl: string };
-//     Library: undefined;
-// };
-export type RootStackParamList = {
+export type RootDrawerParamList = {
+    Main: MainStackParamList;
+};
+
+export type MainStackParamList = {
     BookList: { shelf: Shelf | undefined }; // TODO: This shouldn't take a Shelf. It should take a ShelfID. But how do we get the shelf from a shelf ID?
     BookReader: { bookUrl: string };
     Library: undefined;
@@ -14,23 +13,23 @@ export type RootStackParamList = {
 };
 
 export type BookListScreenProps = NativeStackScreenProps<
-    RootStackParamList,
+    MainStackParamList,
     "BookList",
-    "PUBViewer"
+    "MainStack"
 >;
 
 export type ReaderScreenProps = NativeStackScreenProps<
-    RootStackParamList,
+    MainStackParamList,
     "BookReader",
-    "PUBViewer"
+    "MainStack"
 >;
 export type HomeScreenProps = NativeStackScreenProps<
-    RootStackParamList,
+    MainStackParamList,
     "Home",
-    "PUBViewer"
+    "MainStack"
 >;
 export type LibraryScreenProps = NativeStackScreenProps<
-    RootStackParamList,
+    MainStackParamList,
     "Library",
-    "PUBViewer"
+    "MainStack"
 >;

@@ -1,21 +1,38 @@
+import { DrawerNavigationProp } from "@react-navigation/drawer";
+import { useHeaderHeight } from "@react-navigation/elements";
+import Constants from "expo-constants";
 import * as React from "react";
-import { FlatList, SafeAreaView, TouchableOpacity } from "react-native";
+import {
+    FlatList,
+    Platform,
+    SafeAreaView,
+    TouchableOpacity,
+} from "react-native";
 import { Button, useTheme } from "react-native-paper";
+import { Item } from "react-navigation-header-buttons";
 import { BloomContext } from "../../BloomContext";
 import { Spacing } from "../../constants/Spacing";
+import I18n from "../../i18n/i18n";
 import {
+    deleteBookOrShelf,
     initRootCollection,
     syncCollectionAndFetch,
 } from "../../models/BookCollection";
 import {
     Book,
     BookOrShelf,
+    displayName,
     isShelf,
     Shelf,
     sortedListForShelf,
 } from "../../models/BookOrShelf";
 import * as ImportBookModule from "../../native_modules/ImportBookModule";
-import { BookListScreenProps } from "../../navigationTypes";
+import {
+    BookListScreenProps,
+    RootDrawerParamList,
+} from "../../navigationTypes";
+import { BRHeaderButtons } from "../shared/BRHeaderButtons";
+import { HeaderImage } from "./BookListHeader";
 import BookListItem from "./BookListItem";
 import ShelfListItem from "./ShelfListItem";
 
@@ -23,36 +40,29 @@ export const BookList: React.FunctionComponent<BookListScreenProps> = ({
     navigation,
     route,
 }) => {
-    // TODO: Look at BloomReader-RN's implementation and pull a lot more things out of it.
     const [selectedItem, setSelectedItem] = React.useState<
         BookOrShelf | undefined
     >(undefined);
     const [fullyLoaded, setFullyLoaded] = React.useState(false); // Review: in BloomReader-RN, it was implicitly boolean | undefined. Check that we don't actually need undefined.
 
     const theme = useTheme();
+    // TODO: This is way too small in Landscape mode. not sure why.
+    const headerImageHeight =
+        useHeaderHeight() - Constants.statusBarHeight - Spacing.Small;
 
     const bloomContext = React.useContext(BloomContext);
 
-    const getShelf = React.useCallback((): Shelf | undefined => {
-        return route.params.shelf;
-    }, [route.params.shelf]);
-
     const selectItem = (item: BookOrShelf) => {
         setSelectedItem(item);
-        // TODO: Is this necessary?
-        //this.props.navigation.setParams({ selectedItem: item });
     };
 
     const clearSelectedItem = () => {
         setSelectedItem(undefined);
-
-        // TODO: Implement equivalent of this:
-        // this.props.navigation.setParams({ selectedItem: undefined });
     };
+
     React.useEffect(() => {
         const syncCollectionAsync = async () => {
-            const shelf = getShelf();
-            if (shelf === undefined) {
+            if (route.params.shelf === undefined) {
                 // This is the root BookList
                 // // Sync collection with actual contents of public book folders
                 // const updatedCollection = await syncCollectionAndFetch();
@@ -69,7 +79,7 @@ export const BookList: React.FunctionComponent<BookListScreenProps> = ({
             setFullyLoaded(true);
         };
         syncCollectionAsync();
-    }, [getShelf]);
+    }, [route.params.shelf]);
 
     const checkForBooksToImport = async () => {
         const updatedCollection =
@@ -87,7 +97,6 @@ export const BookList: React.FunctionComponent<BookListScreenProps> = ({
 
     const openBook = (book: Book) =>
         navigation.navigate("BookReader", {
-            //book: book,
             bookUrl: book.filepath,
         });
 
@@ -97,10 +106,93 @@ export const BookList: React.FunctionComponent<BookListScreenProps> = ({
         });
     };
 
-    // TODO: Navigation options
+    React.useEffect(() => {
+        if (selectedItem) {
+            const deleteSelectedItem = async () => {
+                if (!selectedItem) {
+                    console.warn(
+                        "deletedSelectedItem called, but selectedItem is undefined."
+                    );
+                    return;
+                }
+                const newCollection = await deleteBookOrShelf(selectedItem);
+                bloomContext.setBookCollection(newCollection);
+                clearSelectedItem();
+            };
 
-    const list = sortedListForShelf(getShelf(), bloomContext.bookCollection);
+            navigation.setOptions({
+                //headerTitle: displayName(selectedItem), //BloomReader-RN does this, but BloomReader Android just leaves it blank.
+                headerTitle: "",
+                headerLeft: () => (
+                    <BRHeaderButtons>
+                        <Item
+                            title="back"
+                            iconName={
+                                Platform.OS === "ios"
+                                    ? "ios-arrow-back"
+                                    : "md-arrow-back"
+                            }
+                            onPress={clearSelectedItem}
+                        />
+                    </BRHeaderButtons>
+                ),
+                headerRight: () => (
+                    <BRHeaderButtons>
+                        {/* Sharing not supported in this version */}
+                        {/* <Item
+                            title="share"
+                            iconName="md-share"
+                            onPress={shareSelectedItem)}
+                        /> */}
+                        <Item
+                            title="trash"
+                            iconName={
+                                Platform.OS === "ios" ? "ios-trash" : "md-trash"
+                            }
+                            onPress={deleteSelectedItem}
+                        />
+                    </BRHeaderButtons>
+                ),
+            });
+        } else {
+            navigation.setOptions({
+                headerTitle: route.params.shelf
+                    ? displayName(route.params.shelf)
+                    : () => <HeaderImage height={headerImageHeight} />,
+                headerLeft: route.params.shelf
+                    ? undefined
+                    : () => (
+                          // Let ReactNavigation supply the default back arrow
+                          <BRHeaderButtons>
+                              <Item
+                                  title="drawer"
+                                  iconName="md-menu"
+                                  onPress={
+                                      navigation.getParent<
+                                          DrawerNavigationProp<RootDrawerParamList>
+                                      >()?.toggleDrawer
+                                  }
+                                  accessibilityLabel={I18n.t("Main Menu")}
+                              />
+                          </BRHeaderButtons>
+                      ),
+                headerRight: undefined,
+            });
+        }
+    }, [
+        route.params.shelf,
+        navigation,
+        selectedItem,
+        headerImageHeight,
+        bloomContext,
+    ]);
 
+    const list = sortedListForShelf(
+        route.params.shelf,
+        bloomContext.bookCollection
+    );
+
+    //console.log("Rendering BookList " + Date.now());
     return (
         <SafeAreaView
             style={{

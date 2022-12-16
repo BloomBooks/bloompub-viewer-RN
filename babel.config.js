@@ -7,5 +7,6 @@ module.exports = function (api) {
                 plugins: ["react-native-paper/babel"], // reduces bundle size
             },
         },
+        plugins: ["react-native-reanimated/plugin"],
     };
 };

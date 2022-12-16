@@ -1,9 +1,6 @@
-import { useHeaderHeight } from "@react-navigation/elements";
 import { NativeStackHeaderProps } from "@react-navigation/native-stack";
-import Constants from "expo-constants";
-import React from "react";
+import React, { FunctionComponent } from "react";
 import { Image, View } from "react-native";
-import { Spacing } from "../../constants/Spacing";
 
 // export const BookListHeader = ({
 //     options,
@@ -16,7 +13,10 @@ import { Spacing } from "../../constants/Spacing";
 //     );
 // };
 
-export const HeaderImage = () => {
+interface IHeaderImageProps {
+    height: number;
+}
+export const HeaderImage: FunctionComponent<IHeaderImageProps> = (props) => {
     // TODO: Actually, compared to the Android app, the default header height is too short
     //
     // BloomReader (Android):
@@ -30,17 +30,15 @@ export const HeaderImage = () => {
     // // Image ratio is 600x156 pixels; adjust height to match width of drawer
     // const imageHeight = (imageWidth / 600) * 156;
 
-    const imageHeight =
-        useHeaderHeight() - Constants.statusBarHeight - Spacing.Small;
     // Image ratio is 600x156 pixels; adjust height to match width of drawer
-    const imageWidth = (imageHeight * 600) / 156;
+    const imageWidth = (props.height * 600) / 156;
 
     return (
         <Image
             source={require("../../../assets/bloom-reader-against-dark.png")}
             style={{
                 width: imageWidth,
-                height: imageHeight,
+                height: props.height,
             }}
         />
     );

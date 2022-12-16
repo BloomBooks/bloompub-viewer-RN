@@ -41,6 +41,7 @@ yarn start
 
 -   Error in network response: Ensure network settings correct (see one-time setup)
 -   "Cannot connect to Metro": It times out really quickly. Reload the app on your phone.
+-   If there is a react-native-reanimated error upon start: See if clearing the cache will help. "npx expo start --dev-client --clear"
 
 ## Debugging bloom-player
 
@@ -58,10 +59,10 @@ yarn start
 -   Otherwise, just doing "yarn start" from your dev machine is sufficient to deliver simpler changes like Typescript code changes or adding a new JS-only module.
 -   yarn global add eas-cli
 -   Android:
--       Run "eas build --profile development --platform android"
+-         Run "eas build --profile development --platform android"
 -   iOS
--       Run "eas device:create"
--       Send the QR code or link to any iOS devices you want to be able to access this. On the device, open the QR code/link, download the profile, then install the profile. (https://docs.expo.dev/build/internal-distribution/#22-configure-app-signing-credentials-for-ios)
--       "eas build --profile development --platform ios"
+-         Run "eas device:create"
+-         Send the QR code or link to any iOS devices you want to be able to access this. On the device, open the QR code/link, download the profile, then install the profile. (https://docs.expo.dev/build/internal-distribution/#22-configure-app-signing-credentials-for-ios)
+-         "eas build --profile development --platform ios"
 -   You can also substitute "--platform all" to build both at once. (FYI, this will be billed as 2 builds, not 1)
 -   Further Reading: https://docs.expo.dev/development/create-development-builds/
