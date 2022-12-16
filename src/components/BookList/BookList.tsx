@@ -1,3 +1,4 @@
+import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { useHeaderHeight } from "@react-navigation/elements";
 import Constants from "expo-constants";
 import * as React from "react";
@@ -26,7 +27,10 @@ import {
     sortedListForShelf,
 } from "../../models/BookOrShelf";
 import * as ImportBookModule from "../../native_modules/ImportBookModule";
-import { BookListScreenProps } from "../../navigationTypes";
+import {
+    BookListScreenProps,
+    RootDrawerParamList,
+} from "../../navigationTypes";
 import { BRHeaderButtons } from "../shared/BRHeaderButtons";
 import { HeaderImage } from "./BookListHeader";
 import BookListItem from "./BookListItem";
@@ -42,6 +46,7 @@ export const BookList: React.FunctionComponent<BookListScreenProps> = ({
     const [fullyLoaded, setFullyLoaded] = React.useState(false); // Review: in BloomReader-RN, it was implicitly boolean | undefined. Check that we don't actually need undefined.
 
     const theme = useTheme();
+    // TODO: This is way too small in Landscape mode. not sure why.
     const headerImageHeight =
         useHeaderHeight() - Constants.statusBarHeight - Spacing.Small;
 
@@ -162,10 +167,11 @@ export const BookList: React.FunctionComponent<BookListScreenProps> = ({
                               <Item
                                   title="drawer"
                                   iconName="md-menu"
-                                  // onPress={navigation.toggleDrawer}
-                                  onPress={() => {
-                                      alert("Pretending to open drawer");
-                                  }}
+                                  onPress={
+                                      navigation.getParent<
+                                          DrawerNavigationProp<RootDrawerParamList>
+                                      >()?.toggleDrawer
+                                  }
                                   accessibilityLabel={I18n.t("Main Menu")}
                               />
                           </BRHeaderButtons>
@@ -186,7 +192,7 @@ export const BookList: React.FunctionComponent<BookListScreenProps> = ({
         bloomContext.bookCollection
     );
 
-    console.log("Rendering BookList " + Date.now());
+    //console.log("Rendering BookList " + Date.now());
     return (
         <SafeAreaView
             style={{

@@ -49,6 +49,11 @@ export default class I18n {
         UpdatingBookCollectionFormat:
             "Updating the format of your book collection...",
         CannotShare: "Sorry, can't share this file.",
+        // Additional ones I added:
+        // TODO: Not added to either en.json or fr.json
+        "Release Notes": "Release Notes",
+        "About Bloom Reader": "About Bloom Reader",
+        "About Bloom": "About Bloom",
     };
 
     public static t(key: string): string {
