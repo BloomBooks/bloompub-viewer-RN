@@ -1,6 +1,7 @@
 import * as Application from "expo-application";
 import React, { FunctionComponent } from "react";
-import { SafeAreaView, View, Dimensions, Image, Text } from "react-native";
+import { SafeAreaView, View, Dimensions, Image } from "react-native";
+import { Text } from "react-native-paper";
 import I18n from "../../i18n/i18n";
 import DrawerMenuItem from "./DrawerMenuItem";
 // import { DrawerItemsProps } from "react-navigation";
@@ -8,10 +9,11 @@ import DrawerMenuItem from "./DrawerMenuItem";
 // import * as Share from "../../util/Share";
 import * as ErrorLog from "../../util/ErrorLog";
 import { DrawerContentComponentProps } from "@react-navigation/drawer";
+import { pickBloomPubAsync } from "../../util/FilePicker";
 
-export const DrawerMenu: FunctionComponent<
-    DrawerContentComponentProps
-> = () => {
+export const DrawerMenu: FunctionComponent<DrawerContentComponentProps> = ({
+    navigation,
+}) => {
     // Have the drawer cover most of the screen
     const drawerWidth = Dimensions.get("window").width - 16;
     // We only want the logo to be about 2/3 of that width
@@ -57,6 +59,25 @@ export const DrawerMenu: FunctionComponent<
             this.props.navigation.closeDrawer();
           }}
         /> */}
+            <DrawerMenuItem
+                label={I18n.t("Open BloomPUB file")}
+                // BR Android uses Bookshelf.png, but I wonder what about Open.png from bloompub-viewer
+                // iconSource={require("../../../assets/Open.png")}
+                iconSource={require("../../../assets/bookshelf.png")}
+                onPress={async () => {
+                    const bookUrl = await pickBloomPubAsync();
+                    if (!bookUrl) {
+                        return;
+                    }
+
+                    navigation.navigate("Main", {
+                        screen: "BookReader",
+                        params: {
+                            bookUrl,
+                        },
+                    });
+                }}
+            />
             <View style={{ borderBottomWidth: 1, borderBottomColor: "gray" }} />
             <DrawerMenuItem
                 label={I18n.t("Release Notes")}

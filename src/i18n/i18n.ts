@@ -51,6 +51,7 @@ export default class I18n {
         CannotShare: "Sorry, can't share this file.",
         // Additional ones I added:
         // TODO: Not added to either en.json or fr.json
+        "Open BloomPUB file": "Open BloomPUB file",
         "Release Notes": "Release Notes",
         "About Bloom Reader": "About Bloom Reader",
         "About Bloom": "About Bloom",
