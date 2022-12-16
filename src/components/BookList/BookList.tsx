@@ -246,7 +246,9 @@ export const BookList: React.FunctionComponent<BookListScreenProps> = ({
                 style={{
                     paddingHorizontal: Spacing.ExtraSmall,
                 }}
-                // TODO: Add a search icon
+                // TODO: The positioning doesn't match up perfectly with BR Android.
+                // Ask if that matters, or if the current position is perfectly okay too.
+                icon={"magnify"}
             >
                 Get more books from our library
             </Button>
