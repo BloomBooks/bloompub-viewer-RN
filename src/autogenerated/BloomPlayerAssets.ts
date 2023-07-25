@@ -2,7 +2,7 @@
 import { Asset } from "expo-asset";
 
 export const bloomPlayerAssets = [
-	Asset.fromModule(require("../../dist/bloom-player/bloomPlayer-153cc4447831a6991f4f.min.jsAsset")),
+	Asset.fromModule(require("../../dist/bloom-player/bloomPlayer-f4a10025e95ab445024b.min.jsAsset")),
 	Asset.fromModule(require("../../dist/bloom-player/bloomplayer.htm")),
 	Asset.fromModule(require("../../dist/bloom-player/right_answer-913c37e88e2939122d763361833efd24.mp3")),
 	Asset.fromModule(require("../../dist/bloom-player/wrong_answer-f96cfc1e0cc2cea2dd523d521d4c8738.mp3")),
