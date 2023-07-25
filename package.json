@@ -14,7 +14,8 @@
         "web": "expo start --dev-client --web",
         "lint": "eslint \"./**/!(*.d).ts{,x}\"",
         "postinstallComments": "// Runs automatically after running 'yarn' or 'yarn install'",
-        "postinstall": "node ./scripts/copyWebModules.js"
+        "postinstall": "node ./scripts/copyWebModules.js",
+        "build:ios": "yarn && eas build --profile development --platform ios"
     },
     "dependencies": {
         "@react-native-async-storage/async-storage": "~1.17.3",
