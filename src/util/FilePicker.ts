@@ -8,11 +8,13 @@ export const pickBloomPubAsync = async () => {
         // Unfortunately, this doesn't seem to do anything.
         type: "application/octet-stream",
         copyToCacheDirectory: true,
+        multiple: false,
     };
 
     const pickerResult = await DocumentPicker.getDocumentAsync(options);
-    if (pickerResult.type === "success") {
-        const lcFilename = pickerResult.name.toLowerCase();
+    if (!pickerResult.canceled) {
+        const pickerAsset = pickerResult.assets[0];
+        const lcFilename = pickerAsset.name.toLowerCase();
         const lastDotIndex = lcFilename.lastIndexOf(".");
         if (lastDotIndex < 1) {
             // shouldn't happen!
@@ -24,9 +26,9 @@ export const pickBloomPubAsync = async () => {
             alert("Please choose a .bloompub file");
             return null;
         }
-        const chosenBookUri = pickerResult.uri;
+        const chosenBookUri = pickerAsset.uri;
         console.log("Reading... " + chosenBookUri);
-        console.log("Filename=" + pickerResult.name);
+        console.log("Filename=" + pickerAsset.name);
         return chosenBookUri;
     } else {
         console.info("canceled");
