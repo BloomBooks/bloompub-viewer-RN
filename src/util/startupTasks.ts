@@ -16,11 +16,22 @@ export default async function startupTasks(): Promise<void> {
     cacheCleanup();
 
     const lastRunVersion = await getLastRunVersion();
+    let shouldRunStartupTasks = false;
     if (lastRunVersion !== APP_VERSION) {
         console.info("StartupTasks: newAppVersion detected.");
+        shouldRunStartupTasks = true;
+    } else if (APP_VERSION.startsWith("0.")) {
+        console.info(
+            "StartupTasks: running every time because on major version 0."
+        );
+        shouldRunStartupTasks = true;
+    }
+    if (shouldRunStartupTasks) {
         ErrorLog.logNewAppVersion(APP_VERSION);
         if (lastRunVersion !== null) {
-            BRAnalytics.reportInstallationSource();
+            if (!APP_VERSION.startsWith("0.")) {
+                BRAnalytics.reportInstallationSource();
+            }
             await updateBookListFormatIfNeeded(
                 await getExistingCollectionFormatVersion()
             );
