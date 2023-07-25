@@ -3,12 +3,15 @@ import * as BookStorage from "../storage/BookStorage";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ErrorLog from "./ErrorLog";
 import * as BRAnalytics from "./BRAnalytics";
-import { updateBookListFormatIfNeeded } from "../models/BookCollection";
+import {
+    COLLECTION_FORMAT_VERSION,
+    updateBookListFormatIfNeeded,
+} from "../models/BookCollection";
 import { importSampleBooks } from "../storage/SampleBooks";
 
 const APP_VERSION = require("../../package.json").version;
 const LAST_RUN_VERSION_KEY = "bloomreader.lastRunVersion";
-const COLLECTION_FORMAT_VERSION = "bloomreader.bookItemVersion";
+const COLLECTION_FORMAT_VERSION_KEY = "bloomreader.bookItemVersion";
 
 export default async function startupTasks(): Promise<void> {
     await BookStorage.createDirectories();
@@ -65,12 +68,13 @@ async function getLastRunVersion(): Promise<string | null> {
 }
 
 async function getExistingCollectionFormatVersion(): Promise<string | null> {
-    return AsyncStorage.getItem(COLLECTION_FORMAT_VERSION);
+    return AsyncStorage.getItem(COLLECTION_FORMAT_VERSION_KEY);
 }
 
 async function setVersions(): Promise<void> {
     AsyncStorage.multiSet([
         [LAST_RUN_VERSION_KEY, APP_VERSION],
-        [COLLECTION_FORMAT_VERSION, COLLECTION_FORMAT_VERSION],
+        // [COLLECTION_FORMAT_VERSION, COLLECTION_FORMAT_VERSION], // This is the old code, but I don't think it's right. It sets it to the literal string "bloomreader.bookItemVersion"
+        [COLLECTION_FORMAT_VERSION_KEY, COLLECTION_FORMAT_VERSION],
     ]);
 }
