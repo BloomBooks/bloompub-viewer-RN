@@ -23,7 +23,6 @@
         "@react-navigation/native": "^6.0.13",
         "@react-navigation/native-stack": "^6.9.1",
         "@types/react": "~18.2.14",
-        "@types/react-native": "~0.70.6",
         "bloom-player": "^2.1.19",
         "expo": "49.0.0",
         "expo-asset": "~8.10.1",
