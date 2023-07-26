@@ -14,6 +14,7 @@ const LAST_RUN_VERSION_KEY = "bloomreader.lastRunVersion";
 const COLLECTION_FORMAT_VERSION_KEY = "bloomreader.bookItemVersion";
 
 export default async function startupTasks(): Promise<void> {
+    // Note: You can reset the AsyncStorage by manually calling this: await AsyncStorage.clear()
     await BookStorage.createDirectories();
     await BRAnalytics.setup();
     cacheCleanup();
